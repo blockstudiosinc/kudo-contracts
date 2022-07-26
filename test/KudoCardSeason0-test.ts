@@ -33,20 +33,9 @@ describe("KudoCardSeason0", function () {
       const i: Interface = new Interface([
         "function transferFrom(address from,address to,uint256 tokenId)",
       ]);
-
       const functionSignature: string = i.getSighash("transferFrom");
 
-      const txnHash: string = await forwarder.call({
-        to: contract.address,
-        data: ethers.utils.hexConcat([
-          functionSignature,
-          ethers.utils.defaultAbiCoder.encode(
-            ["address", "address", "uint256", "address"],
-            [user1.address, user2.address, tokenId, user1.address]
-          ),
-        ]),
-      });
-
+      // Append the extra user1.address which is looked at in _msgSender to find the actual signer
       const transactionRequest: TransactionRequest = {
         to: contract.address,
         data: ethers.utils.hexConcat([
@@ -60,6 +49,7 @@ describe("KudoCardSeason0", function () {
 
       await forwarder.sendTransaction(transactionRequest);
 
+      // Assert it was transferred to user2
       expect(await contract.ownerOf(tokenId)).to.eq(user2.address);
     });
   });
