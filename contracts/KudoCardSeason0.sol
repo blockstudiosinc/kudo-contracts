@@ -49,12 +49,6 @@ contract KudoCardSeason0 is
         public
         onlyRole(MINTER_ROLE)
     {
-        // console.log("_msgData");
-        // console.logBytes(_msgData());
-
-        // console.log("msgSender");
-        // console.log(_msgSender());
-
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
@@ -68,21 +62,6 @@ contract KudoCardSeason0 is
     ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, tokenId);
     }
-
-    // todo: for debugging remove
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public override(ERC721) {
-        console.log("transferFrom()");
-        console.log("_msgSender()", _msgSender());
-        console.logBytes(_msgData());
-
-        ERC721.transferFrom(from, to, tokenId);
-    }
-
-    // todo: for debugging remove
 
     // The following functions are overrides required by Solidity.
 
