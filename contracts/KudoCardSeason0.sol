@@ -1,21 +1,33 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.15;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+
+import "hardhat/console.sol";
 
 /// @custom:security-contact security@kudo.app
-contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
+contract KudoCardSeason0 is
+    ERC721,
+    ERC721URIStorage,
+    ERC2771Context,
+    Pausable,
+    AccessControl
+{
     using Counters for Counters.Counter;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
 
-    constructor() ERC721("KUDO Card Season 0", "KUDO") {
+    constructor(address trustedForwarder)
+        ERC721("KUDO Card Season 0", "KUDO")
+        ERC2771Context(trustedForwarder)
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
@@ -76,5 +88,25 @@ contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    // Overrides for ERC2771Context for meta transactions
+
+    function _msgSender()
+        internal
+        view
+        override(ERC2771Context, Context)
+        returns (address sender)
+    {
+        return ERC2771Context._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        override(ERC2771Context, Context)
+        returns (bytes calldata)
+    {
+        return ERC2771Context._msgData();
     }
 }
