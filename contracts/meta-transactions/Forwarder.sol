@@ -48,18 +48,6 @@ contract Forwarder is EIP712 {
         view
         returns (bool)
     {
-        console.log("chainID", block.chainid);
-        console.log("signature");
-        console.logBytes(signature);
-
-        console.log("req");
-        console.log("req.data");
-        console.log("from", req.from);
-        console.log("to", req.to);
-        console.log("value", req.value);
-        console.log("gas", req.gas);
-        console.log("nonce", req.nonce);
-        console.logBytes(req.data);
         address signer = _hashTypedDataV4(
             keccak256(
                 abi.encode(
@@ -73,37 +61,6 @@ contract Forwarder is EIP712 {
                 )
             )
         ).recover(signature);
-
-        console.log("encode");
-        console.logBytes(
-            abi.encode(
-                _TYPEHASH,
-                req.from,
-                req.to,
-                req.value,
-                req.gas,
-                req.nonce,
-                keccak256(req.data)
-            )
-        );
-        // console.log("keccak encode");
-
-        bytes32 x = keccak256(
-            abi.encode(
-                _TYPEHASH,
-                req.from,
-                req.to,
-                req.value,
-                req.gas,
-                req.nonce,
-                keccak256(req.data)
-            )
-        );
-        console.logBytes32(x);
-
-        console.log("signer", signer);
-        console.log("from", req.from);
-        console.log("nonce", _nonces[req.from]);
 
         return _nonces[req.from] == req.nonce && signer == req.from;
     }
@@ -119,13 +76,13 @@ contract Forwarder is EIP712 {
         );
         _nonces[req.from] = req.nonce + 1;
 
+        // [KUDO] Removed gas and value parameters
         // (bool success, bytes memory returndata) = req.to.call{
         //     gas: req.gas,
         //     value: req.value
         // }(abi.encodePacked(req.data, req.from));
 
-        // [KUDO] TODO: We could hardcode this `to` parameter to our market contract
-        // [KUDO] Removed gas and value parameters
+        // [KUDO] TODO: We could hardcode or whitelist this `to` parameter to our market contract
         (bool success, bytes memory returndata) = req.to.call(
             abi.encodePacked(req.data, req.from)
         );

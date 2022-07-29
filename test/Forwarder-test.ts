@@ -1,22 +1,17 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { sign } from "crypto";
-import { AbiCoder, Interface } from "ethers/lib/utils";
-import hre, { ethers } from "hardhat";
+import { Contract } from "ethers";
+import { Interface } from "ethers/lib/utils";
+import { ethers } from "hardhat";
+import { Context } from "mocha";
 
 describe("Forwarder", function () {
   describe("execute", async () => {
-    it("doesn't work if not sent from the forwarder address", async () => {
+    it("works with a valid signature", async () => {
       const [deployer, kudoWallet, user1] = await ethers.getSigners();
-
-      console.log("deployer", deployer.address);
-      console.log("kudoWallet", kudoWallet.address);
-      console.log("user1", user1.address);
 
       const Forwarder = await ethers.getContractFactory("Forwarder");
       const forwarderContract = await Forwarder.connect(deployer).deploy();
       await forwarderContract.deployed();
-      console.log("forwarder contract", forwarderContract.address);
 
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
@@ -25,53 +20,97 @@ describe("Forwarder", function () {
         forwarderContract.address
       );
       await cardContract.deployed();
-      console.log("card contract", cardContract.address);
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
 
-      console.log(
-        "chainId",
-        await (
-          await ethers.getDefaultProvider().getNetwork()
-        ).chainId
-      );
-      const request = await buildRequest(
+      let request = await buildRequest(
         user1.address,
-        forwarderContract.address,
+        forwarderContract,
         cardContract.address
       );
 
       // Note: This function is an experimental feature and may remove the _ at some point
-      const signature: string = await user1._signTypedData(
+      let signature: string = await user1._signTypedData(
         request.domain,
         request.types,
         request.message
       );
-
-      const verifiedAddress = ethers.utils.verifyTypedData(
-        request.domain,
-        request.types,
-        request.message,
-        signature
-      );
-      console.log("Verif, user1", verifiedAddress, user1.address);
-      expect(verifiedAddress).to.equal(user1.address); // works !
-
-      console.log("test signature", signature);
 
       await forwarderContract
         .connect(kudoWallet)
         .execute(request.message, signature);
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(1);
+
+      // Send another request
+      request = await buildRequest(
+        user1.address,
+        forwarderContract,
+        cardContract.address
+      );
+
+      // Note: This function is an experimental feature and may remove the _ at some point
+      signature = await user1._signTypedData(
+        request.domain,
+        request.types,
+        request.message
+      );
+
+      await forwarderContract
+        .connect(kudoWallet)
+        .execute(request.message, signature);
+
+      expect(await forwarderContract.getNonce(user1.address)).to.eq(2);
+    });
+
+    it("doesn't work with an invalid signature", async () => {
+      const [deployer, kudoWallet, user1] = await ethers.getSigners();
+
+      const Forwarder = await ethers.getContractFactory("Forwarder");
+      const forwarderContract = await Forwarder.connect(deployer).deploy();
+      await forwarderContract.deployed();
+
+      const KudoCardSeason0 = await ethers.getContractFactory(
+        "KudoCardSeason0"
+      );
+      const cardContract = await KudoCardSeason0.connect(deployer).deploy(
+        forwarderContract.address
+      );
+      await cardContract.deployed();
+
+      expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
+
+      const request = await buildRequest(
+        user1.address,
+        forwarderContract,
+        cardContract.address
+      );
+
+      request.message.nonce = 999999;
+
+      const invalidSignature: string = await user1._signTypedData(
+        request.domain,
+        request.types,
+        request.message
+      );
+
+      await expect(
+        forwarderContract
+          .connect(kudoWallet)
+          .execute(request.message, invalidSignature)
+      ).to.be.revertedWith(
+        "MinimalForwarder: signature does not match request"
+      );
+
+      expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
     });
   });
 });
 
 const buildRequest = async (
   fromAddress: string,
-  forwarderContractAddress: string,
-  theContract: string
+  forwarderContract: Contract,
+  contractToCallAddress: string
 ) => {
   const iface = new Interface(["function safeMint(address to, string uri)"]);
 
@@ -80,35 +119,30 @@ const buildRequest = async (
     "some.token.uri",
   ]);
 
-  console.log("encodedNFtData", nftData);
-
-  // TODO
-  const nonce = 0;
+  // TODO: Read this from the contract
+  const nonce = parseInt(await forwarderContract.getNonce(fromAddress));
 
   const message = {
     from: fromAddress,
-    to: theContract, // Not used
+    to: contractToCallAddress,
     value: 0, // Not used
     gas: 0, // Not used
-    nonce: nonce, // TODO: Read this from the contract
+    nonce: nonce,
     data: nftData,
   };
 
+  // Note: this is hardhat's chain ID. Will need to be dynamic with the netwok you're on.
+  const chainId = 31337;
+
   return {
+    // Note: this name and version has to match exactly with the constructor params in Forwarder.sol
     domain: {
       name: "MinimalForwarder",
       version: "0.0.1",
-      chainId: 31337, // (await ethers.getDefaultProvider().getNetwork()).chainId,
-      verifyingContract: forwarderContractAddress,
-      // salt: "0x0000000000000000000000000000000000000000000000000000000000013881", // Salt is mumbai's chainId 80001 in hex
+      chainId: chainId,
+      verifyingContract: forwarderContract.address,
     },
     types: {
-      // EIP712Domain: [
-      //   { name: "name", type: "string" },
-      //   { name: "version", type: "string" },
-      //   { name: "chainId", type: "uint256" },
-      //   { name: "verifyingContract", type: "address" },
-      // ],
       ForwardRequest: [
         {
           name: "from",
@@ -136,7 +170,6 @@ const buildRequest = async (
         },
       ],
     },
-    primaryType: "ForwardRequest",
     message: message,
   };
 };

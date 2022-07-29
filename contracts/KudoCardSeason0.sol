@@ -49,8 +49,6 @@ contract KudoCardSeason0 is
         public
         onlyRole(MINTER_ROLE)
     {
-        console.log("SAFE MINT CALLED");
-
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
