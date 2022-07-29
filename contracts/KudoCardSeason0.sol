@@ -24,6 +24,10 @@ contract KudoCardSeason0 is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
 
+    mapping(string => bool) private _tokenURIs;
+
+    event BatchMinted(address indexed to, string[] tokenURIs);
+
     constructor(address trustedForwarder)
         ERC721("KUDO Card Season 0", "KUDO")
         ERC2771Context(trustedForwarder)
@@ -45,14 +49,37 @@ contract KudoCardSeason0 is
         _unpause();
     }
 
+    function batchMint(address to, string[] calldata tokenURIs)
+        public
+        onlyRole(MINTER_ROLE)
+        returns (uint256[] memory)
+    {
+        uint256 length = tokenURIs.length;
+
+        uint256[] memory tokenIds = new uint256[](length);
+
+        for (uint256 i = 0; i < length; ++i) {
+            safeMint(to, tokenURIs[i]);
+        }
+
+        emit BatchMinted(to, tokenURIs);
+
+        return tokenIds;
+    }
+
     function safeMint(address to, string memory uri)
         public
         onlyRole(MINTER_ROLE)
     {
+        require(_tokenURIs[uri] == false, "Already minted tokenURI");
+
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+
+        // Prevent duplicate URIs
+        _tokenURIs[uri] = true;
     }
 
     function _beforeTokenTransfer(

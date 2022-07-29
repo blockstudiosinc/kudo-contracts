@@ -4,6 +4,26 @@ import { Interface } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 describe("KudoCardSeason0", function () {
+  describe("safeMint()", async () => {
+    it("it prevents duplicate URIs from being minted", async () => {
+      const [deployer, forwarder, user1, user2] = await ethers.getSigners();
+
+      const KudoCardSeason0 = await ethers.getContractFactory(
+        "KudoCardSeason0"
+      );
+      const contract = await KudoCardSeason0.connect(deployer).deploy(
+        forwarder.address
+      );
+      await contract.deployed();
+
+      await contract.safeMint(user1.address, "some-uri");
+
+      await expect(
+        contract.safeMint(user2.address, "some-uri")
+      ).to.be.revertedWith("Already minted tokenURI");
+    });
+  });
+
   describe("meta transactions", async () => {
     it("doesn't work if not sent from the forwarder address", async () => {
       const [deployer, forwarder, user1, user2] = await ethers.getSigners();
