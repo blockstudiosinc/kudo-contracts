@@ -73,13 +73,13 @@ contract KudoCardSeason0 is
     {
         require(_tokenURIs[uri] == false, "Already minted tokenURI");
 
+        // Prevent duplicate URIs
+        _tokenURIs[uri] = true;
+
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
-
-        // Prevent duplicate URIs
-        _tokenURIs[uri] = true;
     }
 
     function _beforeTokenTransfer(
