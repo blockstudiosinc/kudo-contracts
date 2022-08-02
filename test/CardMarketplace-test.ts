@@ -1,5 +1,4 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { kMaxLength } from "buffer";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
@@ -11,16 +10,13 @@ describe("CardMarketplace", function () {
   let user2: SignerWithAddress;
 
   beforeEach(async () => {
-    const [deployer, forwarder, signer1, signer2] = await ethers.getSigners();
+    const [deployer, signer1, signer2] = await ethers.getSigners();
     user1 = signer1;
     user2 = signer2;
 
     // mUSDC
     const TestERC20 = await ethers.getContractFactory("TestERC20");
-    // TODO: fix forwarder address
-    const testERC20Contract = await TestERC20.connect(deployer).deploy(
-      forwarder.address
-    );
+    const testERC20Contract = await TestERC20.connect(deployer).deploy(10000);
     await testERC20Contract.deployed();
 
     // Card

@@ -41,7 +41,6 @@ contract CardMarketplace is ReentrancyGuard {
         mUSDC = IERC20(_mUSDC);
     }
 
-    // todo reentrancy guard
     // todo access control
 
     function list(uint256 tokenId, uint256 price) external nonReentrant {
