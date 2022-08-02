@@ -4,6 +4,7 @@ pragma solidity ^0.8.15;
 // import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 // import "@openzeppelin/contracts/security/Pausable.sol";
 // import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -12,7 +13,7 @@ import "./KudoCardSeason0.sol";
 import "hardhat/console.sol";
 
 /// @custom:security-contact security@kudo.app
-contract CardMarketplace {
+contract CardMarketplace is ReentrancyGuard {
     using Counters for Counters.Counter;
 
     KudoCardSeason0 public immutable kudoCard;
@@ -43,7 +44,7 @@ contract CardMarketplace {
     // todo reentrancy guard
     // todo access control
 
-    function list(uint256 tokenId, uint256 price) external {
+    function list(uint256 tokenId, uint256 price) external nonReentrant {
         address seller = _msgSender();
 
         require(seller == kudoCard.ownerOf(tokenId), "Not card owner");
