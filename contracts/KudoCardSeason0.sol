@@ -29,9 +29,9 @@ contract KudoCardSeason0 is
 
     event BatchMinted(address indexed to, string[] tokenURIs);
 
-    constructor(address trustedForwarder)
+    constructor()
         ERC721("KUDO Card Season 0", "KUDO")
-        ERC2771ContextUpdatable(trustedForwarder)
+        ERC2771ContextUpdatable(address(0))
     {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
@@ -75,6 +75,7 @@ contract KudoCardSeason0 is
         require(_tokenURIs[uri] == false, "Already minted tokenURI");
 
         uint256 tokenId = _tokenIdCounter.current();
+        // TODO: increment first for easier null check?
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
