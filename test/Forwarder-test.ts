@@ -2,7 +2,6 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { Interface } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { Context } from "mocha";
 
 describe("Forwarder", function () {
   describe("execute", async () => {
@@ -16,10 +15,11 @@ describe("Forwarder", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const cardContract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarderContract.address
-      );
+      const cardContract = await KudoCardSeason0.connect(deployer).deploy();
       await cardContract.deployed();
+      await cardContract
+        .connect(deployer)
+        .updateTrustedForwarder(forwarderContract.address);
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
 
@@ -73,10 +73,11 @@ describe("Forwarder", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const cardContract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarderContract.address
-      );
+      const cardContract = await KudoCardSeason0.connect(deployer).deploy();
       await cardContract.deployed();
+      await cardContract
+        .connect(deployer)
+        .updateTrustedForwarder(forwarderContract.address);
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
 

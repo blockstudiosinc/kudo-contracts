@@ -1,21 +1,33 @@
 import { TransactionRequest } from "@ethersproject/providers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { Contract, Signer } from "ethers";
 import { Interface } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 describe("KudoCardSeason0", function () {
+  let contract: Contract;
+  let admin: SignerWithAddress,
+    forwarder: SignerWithAddress,
+    user1: SignerWithAddress,
+    user2: SignerWithAddress;
+
+  beforeEach(async () => {
+    const [deployer, fwd, signer1, signer2] = await ethers.getSigners();
+    admin = deployer;
+    forwarder = fwd;
+    user1 = signer1;
+    user2 = signer2;
+
+    const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
+    contract = await KudoCardSeason0.connect(deployer).deploy();
+    await contract.deployed();
+
+    await contract.connect(deployer).updateTrustedForwarder(forwarder.address);
+  });
+
   describe("safeMint()", async () => {
     it("it prevents duplicate URIs from being minted", async () => {
-      const [deployer, forwarder, user1, user2] = await ethers.getSigners();
-
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarder.address
-      );
-      await contract.deployed();
-
       await contract.safeMint(user1.address, "some-uri");
 
       await expect(
@@ -26,18 +38,8 @@ describe("KudoCardSeason0", function () {
 
   describe("meta transactions", async () => {
     it("doesn't work if not sent from the forwarder address", async () => {
-      const [deployer, forwarder, user1, user2] = await ethers.getSigners();
-
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarder.address
-      );
-      await contract.deployed();
-
       // Give user1 the NFT
-      await contract.connect(deployer).safeMint(user1.address, "some.uri");
+      await contract.connect(admin).safeMint(user1.address, "some.uri");
 
       const tokenId = 0;
 
@@ -69,18 +71,8 @@ describe("KudoCardSeason0", function () {
     });
 
     it("works from the forwarder address", async () => {
-      const [deployer, forwarder, user1, user2] = await ethers.getSigners();
-
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarder.address
-      );
-      await contract.deployed();
-
       // Give user1 the NFT
-      await contract.connect(deployer).safeMint(user1.address, "some.uri");
+      await contract.connect(admin).safeMint(user1.address, "some.uri");
 
       const tokenId = 0;
 
