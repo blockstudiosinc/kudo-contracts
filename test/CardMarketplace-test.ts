@@ -47,7 +47,7 @@ describe("CardMarketplace", function () {
   describe("list()", async () => {
     it("reverts if the user isn't owner of the NFT", async () => {
       // List NFT
-      const tokenId = 0;
+      const tokenId = 1;
       const price = 10000;
 
       await expect(
@@ -61,7 +61,7 @@ describe("CardMarketplace", function () {
 
     it("reverts if the price isn't valid", async () => {
       // List NFT
-      const tokenId = 0;
+      const tokenId = 1;
       const price = 0;
 
       await expect(
@@ -75,7 +75,7 @@ describe("CardMarketplace", function () {
 
     it("won't list an NFT twice", async () => {
       // List NFT
-      const tokenId = 0;
+      const tokenId = 1;
       const price = 10000;
 
       await expect(marketContract.connect(user1).list(tokenId, price))
@@ -89,7 +89,7 @@ describe("CardMarketplace", function () {
 
     it("allows a user to list their NFT", async () => {
       // List NFT
-      const tokenId = 0;
+      const tokenId = 1;
       const price = 10000;
 
       await expect(marketContract.connect(user1).list(tokenId, price))

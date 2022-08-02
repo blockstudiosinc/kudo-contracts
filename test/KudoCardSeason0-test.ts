@@ -41,7 +41,7 @@ describe("KudoCardSeason0", function () {
       // Give user1 the NFT
       await contract.connect(admin).safeMint(user1.address, "some.uri");
 
-      const tokenId = 0;
+      const tokenId = 1;
 
       // Meta-tx transfer it
       const i: Interface = new Interface([
@@ -74,7 +74,7 @@ describe("KudoCardSeason0", function () {
       // Give user1 the NFT
       await contract.connect(admin).safeMint(user1.address, "some.uri");
 
-      const tokenId = 0;
+      const tokenId = 1;
 
       // Meta-tx transfer it
       const i: Interface = new Interface([

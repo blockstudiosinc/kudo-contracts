@@ -74,9 +74,9 @@ contract KudoCardSeason0 is
     {
         require(_tokenURIs[uri] == false, "Already minted tokenURI");
 
-        uint256 tokenId = _tokenIdCounter.current();
-        // TODO: increment first for easier null check?
         _tokenIdCounter.increment();
+        uint256 tokenId = _tokenIdCounter.current();
+
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
 
