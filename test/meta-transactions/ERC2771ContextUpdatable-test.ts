@@ -9,10 +9,11 @@ describe("ERC2771ContextUpdatable", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarder.address
-      );
+      const contract = await KudoCardSeason0.connect(deployer).deploy();
       await contract.deployed();
+      await contract
+        .connect(deployer)
+        .updateTrustedForwarder(forwarder.address);
 
       expect(await contract.trustedForwarder()).to.eq(forwarder.address);
 
@@ -31,10 +32,11 @@ describe("ERC2771ContextUpdatable", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarder.address
-      );
+      const contract = await KudoCardSeason0.connect(deployer).deploy();
       await contract.deployed();
+      await contract
+        .connect(deployer)
+        .updateTrustedForwarder(forwarder.address);
 
       expect(await contract.trustedForwarder()).to.eq(forwarder.address);
 
@@ -58,10 +60,11 @@ describe("ERC2771ContextUpdatable", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        forwarder.address
-      );
+      const contract = await KudoCardSeason0.connect(deployer).deploy();
       await contract.deployed();
+      await contract
+        .connect(deployer)
+        .updateTrustedForwarder(forwarder.address);
 
       expect(await contract.trustedForwarder()).to.eq(forwarder.address);
 

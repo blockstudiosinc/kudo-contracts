@@ -29,9 +29,9 @@ contract KudoCardSeason0 is
 
     event BatchMinted(address indexed to, string[] tokenURIs);
 
-    constructor(address trustedForwarder)
+    constructor()
         ERC721("KUDO Card Season 0", "KUDO")
-        ERC2771ContextUpdatable(trustedForwarder)
+        ERC2771ContextUpdatable(address(0))
     {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
@@ -77,8 +77,9 @@ contract KudoCardSeason0 is
         // Prevent duplicate URIs
         _tokenURIs[uri] = true;
 
-        uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
+        uint256 tokenId = _tokenIdCounter.current();
+
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
     }

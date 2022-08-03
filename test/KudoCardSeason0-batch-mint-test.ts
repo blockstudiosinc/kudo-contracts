@@ -11,9 +11,7 @@ describe("KudoCardSeason0", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        ethers.constants.AddressZero
-      );
+      const contract = await KudoCardSeason0.connect(deployer).deploy();
       await contract.deployed();
 
       expect(await contract.balanceOf(user1.address)).to.eq(0);
@@ -33,9 +31,7 @@ describe("KudoCardSeason0", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        ethers.constants.AddressZero
-      );
+      const contract = await KudoCardSeason0.connect(deployer).deploy();
       await contract.deployed();
 
       expect(await contract.balanceOf(user1.address)).to.eq(0);
@@ -57,9 +53,7 @@ describe("KudoCardSeason0", function () {
       const KudoCardSeason0 = await ethers.getContractFactory(
         "KudoCardSeason0"
       );
-      const contract = await KudoCardSeason0.connect(deployer).deploy(
-        ethers.constants.AddressZero
-      );
+      const contract = await KudoCardSeason0.connect(deployer).deploy();
       await contract.deployed();
 
       // One tokenUri already taken
