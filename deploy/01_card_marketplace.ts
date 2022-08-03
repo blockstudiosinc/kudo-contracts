@@ -8,6 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const kudoCard: Deployment = await hre.deployments.get("KudoCardSeason0");
 
+  // TODO: Make this dynamic for prod/testnet
   const mUSDC = "0x566368d78dbdec50f04b588e152de3cec0d5889f";
 
   await deploy("CardMarketplace", {
