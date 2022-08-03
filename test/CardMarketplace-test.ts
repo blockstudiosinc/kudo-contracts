@@ -83,10 +83,9 @@ describe("CardMarketplace", function () {
       // List NFT
       const price = 10000;
 
-      await expect(marketContract.connect(user1).list(tokenId, price))
-        .to.emit(marketContract, "CardListed")
-        .withArgs(user1.address, tokenId, price);
+      await marketContract.connect(user1).list(tokenId, price);
 
+      // List again, should fail
       await expect(
         marketContract.connect(user1).list(tokenId, price)
       ).to.be.revertedWith("Not card owner");
@@ -98,7 +97,7 @@ describe("CardMarketplace", function () {
 
       await expect(marketContract.connect(user1).list(tokenId, price))
         .to.emit(marketContract, "CardListed")
-        .withArgs(user1.address, tokenId, price);
+        .withArgs(1, user1.address, tokenId, price);
 
       // Market owns NFT now
       expect(await cardContract.balanceOf(user1.address)).to.eq(0);

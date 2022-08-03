@@ -28,6 +28,7 @@ contract CardMarketplace is ReentrancyGuard {
     mapping(uint256 => Listing) public listings;
 
     event CardListed(
+        uint256 listingId,
         address indexed seller,
         uint256 indexed tokenId,
         uint256 indexed price
@@ -53,7 +54,7 @@ contract CardMarketplace is ReentrancyGuard {
 
         kudoCard.transferFrom(seller, address(this), tokenId);
 
-        emit CardListed(seller, tokenId, price);
+        emit CardListed(listingId, seller, tokenId, price);
     }
 
     // TODO: Add relayer functionality
