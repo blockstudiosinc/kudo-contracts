@@ -4,6 +4,8 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 describe("CardMarketplace", function () {
+  const tokenId = 1;
+
   let marketContract: Contract;
   let cardContract: Contract;
   let user1: SignerWithAddress;
@@ -32,22 +34,27 @@ describe("CardMarketplace", function () {
     );
     await marketContract.deployed();
 
-    // Set the market as the forwarder for NFT for meta tx's
-    await cardContract
-      .connect(deployer)
-      .updateTrustedForwarder(marketContract.address);
+    // TODO: End-to-end tests using meta tx's
+    //
+    // Normally we'd set this, but for these tests we'll call the functions directly
+    // to avoid a bunch of test setup around meta tx's
+    // await cardContract
+    //   .connect(deployer)
+    //   .updateTrustedForwarder(marketContract.address);
 
     // Mint NFT
     await cardContract
       .connect(deployer)
       .safeMint(user1.address, "some-token-uri");
     expect(await cardContract.balanceOf(user1.address)).to.eq(1);
+
+    // Manually approve for ease of testing without meta tx's
+    await cardContract.connect(user1).approve(marketContract.address, tokenId);
   });
 
   describe("list()", async () => {
     it("reverts if the user isn't owner of the NFT", async () => {
       // List NFT
-      const tokenId = 1;
       const price = 10000;
 
       await expect(
@@ -61,7 +68,6 @@ describe("CardMarketplace", function () {
 
     it("reverts if the price isn't valid", async () => {
       // List NFT
-      const tokenId = 1;
       const price = 0;
 
       await expect(
@@ -75,7 +81,6 @@ describe("CardMarketplace", function () {
 
     it("won't list an NFT twice", async () => {
       // List NFT
-      const tokenId = 1;
       const price = 10000;
 
       await expect(marketContract.connect(user1).list(tokenId, price))
@@ -89,7 +94,6 @@ describe("CardMarketplace", function () {
 
     it("allows a user to list their NFT", async () => {
       // List NFT
-      const tokenId = 1;
       const price = 10000;
 
       await expect(marketContract.connect(user1).list(tokenId, price))
