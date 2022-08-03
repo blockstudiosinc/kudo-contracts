@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-describe("CardMarketplace", function () {
+describe("CardMarketplace.list()", function () {
   const tokenId = 1;
 
   let marketContract: Contract;
@@ -52,56 +52,56 @@ describe("CardMarketplace", function () {
     await cardContract.connect(user1).approve(marketContract.address, tokenId);
   });
 
-  describe("list()", async () => {
-    it("reverts if the user isn't owner of the NFT", async () => {
-      // List NFT
-      const price = 10000;
+  it("reverts if the user isn't owner of the NFT", async () => {
+    // List NFT
+    const price = 10000;
 
-      await expect(
-        marketContract.connect(user2).list(tokenId, price)
-      ).to.be.revertedWith("Not card owner");
+    await expect(
+      marketContract.connect(user2).list(tokenId, price)
+    ).to.be.revertedWith("Not card owner");
 
-      // No change
-      expect(await cardContract.balanceOf(user1.address)).to.eq(1);
-      expect(await cardContract.balanceOf(user2.address)).to.eq(0);
-    });
+    // No change
+    expect(await cardContract.balanceOf(user1.address)).to.eq(1);
+    expect(await cardContract.balanceOf(user2.address)).to.eq(0);
+  });
 
-    it("reverts if the price isn't valid", async () => {
-      // List NFT
-      const price = 0;
+  it("reverts if the price isn't valid", async () => {
+    // List NFT
+    const price = 0;
 
-      await expect(
-        marketContract.connect(user1).list(tokenId, price)
-      ).to.be.revertedWith("Price can't be 0");
+    await expect(
+      marketContract.connect(user1).list(tokenId, price)
+    ).to.be.revertedWith("Price can't be 0");
 
-      // No change
-      expect(await cardContract.balanceOf(user1.address)).to.eq(1);
-      expect(await cardContract.balanceOf(user2.address)).to.eq(0);
-    });
+    // No change
+    expect(await cardContract.balanceOf(user1.address)).to.eq(1);
+    expect(await cardContract.balanceOf(user2.address)).to.eq(0);
+  });
 
-    it("won't list an NFT twice", async () => {
-      // List NFT
-      const price = 10000;
+  it("won't list an NFT twice", async () => {
+    // List NFT
+    const price = 10000;
 
-      await marketContract.connect(user1).list(tokenId, price);
+    await marketContract.connect(user1).list(tokenId, price);
 
-      // List again, should fail
-      await expect(
-        marketContract.connect(user1).list(tokenId, price)
-      ).to.be.revertedWith("Not card owner");
-    });
+    // List again, should fail
+    await expect(
+      marketContract.connect(user1).list(tokenId, price)
+    ).to.be.revertedWith("Not card owner");
+  });
 
-    it("allows a user to list their NFT", async () => {
-      // List NFT
-      const price = 10000;
+  it("allows a user to list their NFT", async () => {
+    // List NFT
+    const price = 10000;
 
-      await expect(marketContract.connect(user1).list(tokenId, price))
-        .to.emit(marketContract, "CardListed")
-        .withArgs(1, user1.address, tokenId, price);
+    await expect(marketContract.connect(user1).list(tokenId, price))
+      .to.emit(marketContract, "CardListed")
+      .withArgs(1, user1.address, tokenId, price);
 
-      // Market owns NFT now
-      expect(await cardContract.balanceOf(user1.address)).to.eq(0);
-      expect(await cardContract.balanceOf(marketContract.address)).to.eq(1);
-    });
+    expect((await marketContract.listings(1)).isActive).to.eq(true);
+
+    // Market owns NFT now
+    expect(await cardContract.balanceOf(user1.address)).to.eq(0);
+    expect(await cardContract.balanceOf(marketContract.address)).to.eq(1);
   });
 });

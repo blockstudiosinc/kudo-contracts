@@ -67,7 +67,6 @@ contract Forwarder is EIP712 {
 
     function execute(ForwardRequest calldata req, bytes calldata signature)
         public
-        payable
         returns (bool, bytes memory)
     {
         require(
