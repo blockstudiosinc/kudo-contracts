@@ -34,6 +34,8 @@ contract CardMarketplace is ReentrancyGuard {
         uint256 indexed price
     );
 
+    event CardDelisted(uint256 indexed listingId, address indexed seller);
+
     constructor(address _kudoCard, address _mUSDC) {
         kudoCard = KudoCardSeason0(_kudoCard);
         mUSDC = IERC20(_mUSDC);
@@ -55,6 +57,20 @@ contract CardMarketplace is ReentrancyGuard {
         kudoCard.transferFrom(seller, address(this), tokenId);
 
         emit CardListed(listingId, seller, tokenId, price);
+    }
+
+    function delist(uint256 listingId) external nonReentrant {
+        Listing storage listing = listings[listingId];
+
+        require(listing.isActive == true, "Invalid listing");
+
+        address seller = _msgSender();
+        require(listing.seller == seller, "Not the seller");
+
+        listing.isActive = false;
+        kudoCard.transferFrom(address(this), listing.seller, listing.tokenId);
+
+        emit CardDelisted(listingId, seller);
     }
 
     // TODO: Add relayer functionality
