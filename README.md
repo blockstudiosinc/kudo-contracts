@@ -1,7 +1,7 @@
 # Deployment
 
 1. Create `.env` file
-2. Set `PRIVATE_KEY` and optionally `POLYGONSCAN_API_KEY` to verify the contracts
+2. Set `PRIVATE_KEY` and optionally `ETHERSCAN_API_KEY` to verify the contracts
 3. Run `npm run testnet-deploy` for Mumbai deploy
 
 # Advanced Sample Hardhat Project
