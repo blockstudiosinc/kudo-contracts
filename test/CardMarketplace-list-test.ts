@@ -98,7 +98,9 @@ describe("CardMarketplace.list()", function () {
       .to.emit(marketContract, "CardListed")
       .withArgs(1, user1.address, tokenId, price);
 
-    expect((await marketContract.listings(1)).isActive).to.eq(true);
+    const listing = await marketContract.listings(1);
+    expect(listing.isActive).to.eq(true);
+    expect(listing.isSold).to.eq(false);
 
     // Market owns NFT now
     expect(await cardContract.balanceOf(user1.address)).to.eq(0);

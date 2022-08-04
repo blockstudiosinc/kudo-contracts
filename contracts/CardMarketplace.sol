@@ -24,6 +24,7 @@ contract CardMarketplace is ReentrancyGuard {
         uint256 price;
         address seller;
         bool isActive;
+        bool isSold;
     }
     mapping(uint256 => Listing) public listings;
 
@@ -35,6 +36,13 @@ contract CardMarketplace is ReentrancyGuard {
     );
 
     event CardDelisted(uint256 indexed listingId, address indexed seller);
+
+    event CardSold(
+        uint256 listingId,
+        address indexed seller,
+        address indexed buyer,
+        uint256 indexed price
+    );
 
     constructor(address _kudoCard, address _mUSDC) {
         kudoCard = KudoCardSeason0(_kudoCard);
@@ -52,7 +60,14 @@ contract CardMarketplace is ReentrancyGuard {
         _listingIds.increment();
         uint256 listingId = _listingIds.current();
 
-        listings[listingId] = Listing(listingId, tokenId, price, seller, true);
+        listings[listingId] = Listing(
+            listingId,
+            tokenId,
+            price,
+            seller,
+            true,
+            false
+        );
 
         kudoCard.transferFrom(seller, address(this), tokenId);
 
@@ -71,6 +86,28 @@ contract CardMarketplace is ReentrancyGuard {
         kudoCard.transferFrom(address(this), listing.seller, listing.tokenId);
 
         emit CardDelisted(listingId, seller);
+    }
+
+    function buy(uint256 listingId) external nonReentrant {
+        Listing storage listing = listings[listingId];
+
+        address buyer = _msgSender();
+
+        require(listing.isActive, "Invalid listing");
+        require(listing.seller != buyer, "Buyer is seller");
+        require(listing.isSold == false, "Already sold");
+
+        listing.isActive = false;
+        listing.isSold = true;
+
+        // Transfer payment
+        // TODO: add fee split
+        mUSDC.transferFrom(buyer, listing.seller, listing.price);
+
+        // Transfer the NFT
+        kudoCard.safeTransferFrom(address(this), buyer, listing.tokenId);
+
+        emit CardSold(listingId, listing.seller, buyer, listing.price);
     }
 
     // TODO: Add relayer functionality
