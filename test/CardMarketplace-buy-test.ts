@@ -7,8 +7,7 @@ import { TASK_DEPLOY_RUN_DEPLOY } from "hardhat-deploy";
 describe("CardMarketplace.buy()", function () {
   const tokenId = 1;
   const listingId = 1;
-  // TODO: add in decimals
-  const price = 1000;
+  const price = ethers.utils.parseUnits("10", 18);
 
   let marketContract: Contract;
   let tokenContract: Contract;
@@ -25,7 +24,7 @@ describe("CardMarketplace.buy()", function () {
 
     // mUSDC
     const TestERC20 = await ethers.getContractFactory("TestERC20");
-    tokenContract = await TestERC20.connect(deployer).deploy(10000);
+    tokenContract = await TestERC20.connect(deployer).deploy(price);
     await tokenContract.deployed();
 
     // Card
@@ -101,7 +100,11 @@ describe("CardMarketplace.buy()", function () {
     // Buy
     await expect(() =>
       marketContract.connect(buyer).buy(listingId)
-    ).to.changeTokenBalances(tokenContract, [seller, buyer], [price, -price]);
+    ).to.changeTokenBalances(
+      tokenContract,
+      [seller, buyer],
+      [price, `-${price}`]
+    );
 
     // TODO can we also do these matchers?
     // .to.emit(marketContract, "CardSold")
