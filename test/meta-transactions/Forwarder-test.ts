@@ -123,9 +123,7 @@ describe("Forwarder", function () {
         forwarderContract
           .connect(kudoWallet)
           .execute(request.message, invalidSignature)
-      ).to.be.revertedWith(
-        "MinimalForwarder: signature does not match request"
-      );
+      ).to.be.revertedWith("KudoForwarder: signature does not match request");
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
     });

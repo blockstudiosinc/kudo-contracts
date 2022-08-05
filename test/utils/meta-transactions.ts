@@ -17,13 +17,13 @@ export const buildRequest = async (
     data: functionSignatureAndCalldata,
   };
 
-  // Note: this is hardhat's chain ID. Will need to be dynamic with the netwok you're on.
+  // Note: this is hardhat's chain ID. Will need to be dynamic with the network you're on.
   const chainId = 31337;
 
   return {
     // Note: this name and version has to match exactly with the constructor params in Forwarder.sol
     domain: {
-      name: "MinimalForwarder",
+      name: "KudoForwarder",
       version: "0.0.1",
       chainId: chainId,
       verifyingContract: forwarderContract.address,

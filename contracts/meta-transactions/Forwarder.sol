@@ -37,7 +37,7 @@ contract Forwarder is EIP712 {
 
     mapping(address => uint256) private _nonces;
 
-    constructor() EIP712("MinimalForwarder", "0.0.1") {}
+    constructor() EIP712("KudoForwarder", "0.0.1") {}
 
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];
@@ -71,7 +71,7 @@ contract Forwarder is EIP712 {
     {
         require(
             verify(req, signature),
-            "MinimalForwarder: signature does not match request"
+            "KudoForwarder: signature does not match request"
         );
         _nonces[req.from] = req.nonce + 1;
 

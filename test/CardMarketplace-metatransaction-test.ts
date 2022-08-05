@@ -31,11 +31,6 @@ describe("CardMarketplace meta transactions", function () {
     forwarderContract = await Forwarder.connect(adminWallet).deploy();
     await forwarderContract.deployed();
 
-    // mUSDC
-    const TestERC20 = await ethers.getContractFactory("TestERC20");
-    tokenContract = await TestERC20.connect(adminWallet).deploy(price);
-    await tokenContract.deployed();
-
     // Card
     const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
     cardContract = await KudoCardSeason0.connect(adminWallet).deploy();
@@ -45,7 +40,7 @@ describe("CardMarketplace meta transactions", function () {
     const CardMarketplace = await ethers.getContractFactory("CardMarketplace");
     marketContract = await CardMarketplace.connect(adminWallet).deploy(
       cardContract.address,
-      tokenContract.address,
+      ethers.constants.AddressZero, // mUSDC, not needed in this test
       forwarderContract.address
     );
     await marketContract.deployed();
@@ -119,9 +114,7 @@ describe("CardMarketplace meta transactions", function () {
         forwarderContract
           .connect(adminWallet)
           .execute(request.message, signature)
-      ).to.be.revertedWith(
-        "MinimalForwarder: signature does not match request"
-      );
+      ).to.be.revertedWith("KudoForwarder: signature does not match request");
 
       // Market listed NFT
       expect(await cardContract.ownerOf(tokenId)).to.eq(seller.address);
