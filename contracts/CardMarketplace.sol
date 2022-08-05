@@ -5,12 +5,13 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import "./meta-transactions/ERC2771ContextUpdatable.sol";
 import "./KudoCardSeason0.sol";
 
 import "hardhat/console.sol";
 
 /// @custom:security-contact security@kudo.app
-contract CardMarketplace is ReentrancyGuard {
+contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     using Counters for Counters.Counter;
 
     KudoCardSeason0 public immutable kudoCard;
@@ -34,9 +35,7 @@ contract CardMarketplace is ReentrancyGuard {
         uint256 indexed tokenId,
         uint256 indexed price
     );
-
     event CardDelisted(uint256 indexed listingId, address indexed seller);
-
     event CardSold(
         uint256 listingId,
         address indexed seller,
@@ -44,7 +43,11 @@ contract CardMarketplace is ReentrancyGuard {
         uint256 indexed price
     );
 
-    constructor(address _kudoCard, address _mUSDC) {
+    constructor(
+        address _kudoCard,
+        address _mUSDC,
+        address _trustedForwarder
+    ) ERC2771ContextUpdatable(_trustedForwarder) {
         kudoCard = KudoCardSeason0(_kudoCard);
         mUSDC = IERC20(_mUSDC);
     }
@@ -110,8 +113,23 @@ contract CardMarketplace is ReentrancyGuard {
         emit CardSold(listingId, listing.seller, buyer, listing.price);
     }
 
-    // TODO: Add relayer functionality
-    function _msgSender() internal view returns (address) {
-        return msg.sender;
+    // ERC2771ContextUpdatable overrides for meta transactions
+
+    function _msgSender()
+        internal
+        view
+        override(ERC2771ContextUpdatable)
+        returns (address sender)
+    {
+        return ERC2771ContextUpdatable._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        override(ERC2771ContextUpdatable)
+        returns (bytes calldata)
+    {
+        return ERC2771ContextUpdatable._msgData();
     }
 }

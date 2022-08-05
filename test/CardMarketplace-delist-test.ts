@@ -31,7 +31,8 @@ describe("CardMarketplace.delist()", function () {
     const CardMarketplace = await ethers.getContractFactory("CardMarketplace");
     marketContract = await CardMarketplace.connect(deployer).deploy(
       cardContract.address,
-      testERC20Contract.address
+      testERC20Contract.address,
+      ethers.constants.AddressZero
     );
     await marketContract.deployed();
 

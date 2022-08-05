@@ -1,7 +1,8 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
-import { Interface } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { Interface } from "ethers/lib/utils";
+
+import { buildRequest } from "../utils/meta-transactions";
 
 describe("Forwarder", function () {
   describe("execute", async () => {
@@ -12,21 +13,32 @@ describe("Forwarder", function () {
       const forwarderContract = await Forwarder.connect(deployer).deploy();
       await forwarderContract.deployed();
 
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
+      const CardMarketplace = await ethers.getContractFactory(
+        "CardMarketplace"
       );
-      const cardContract = await KudoCardSeason0.connect(deployer).deploy();
-      await cardContract.deployed();
-      await cardContract
-        .connect(deployer)
-        .updateTrustedForwarder(forwarderContract.address);
+      const marketContract = await CardMarketplace.connect(deployer).deploy(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        forwarderContract.address
+      );
+      await marketContract.deployed();
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
+
+      const iface = new Interface([
+        "function safeMint(address to, string uri)",
+      ]);
+
+      const functionSignatureAndCalldata: string = iface.encodeFunctionData(
+        "safeMint",
+        [user1.address, "some.token.uri"]
+      );
 
       let request = await buildRequest(
         user1.address,
         forwarderContract,
-        cardContract.address
+        marketContract.address,
+        functionSignatureAndCalldata
       );
 
       // Note: This function is an experimental feature and may remove the _ at some point
@@ -46,7 +58,8 @@ describe("Forwarder", function () {
       request = await buildRequest(
         user1.address,
         forwarderContract,
-        cardContract.address
+        marketContract.address,
+        functionSignatureAndCalldata
       );
 
       // Note: This function is an experimental feature and may remove the _ at some point
@@ -70,21 +83,22 @@ describe("Forwarder", function () {
       const forwarderContract = await Forwarder.connect(deployer).deploy();
       await forwarderContract.deployed();
 
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
+      const CardMarketplace = await ethers.getContractFactory(
+        "CardMarketplace"
       );
-      const cardContract = await KudoCardSeason0.connect(deployer).deploy();
-      await cardContract.deployed();
-      await cardContract
-        .connect(deployer)
-        .updateTrustedForwarder(forwarderContract.address);
+      const marketContract = await CardMarketplace.connect(deployer).deploy(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        forwarderContract.address
+      );
+      await marketContract.deployed();
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
 
       const request = await buildRequest(
         user1.address,
         forwarderContract,
-        cardContract.address
+        marketContract.address
       );
 
       request.message.nonce = 999999;
@@ -107,70 +121,3 @@ describe("Forwarder", function () {
     });
   });
 });
-
-const buildRequest = async (
-  fromAddress: string,
-  forwarderContract: Contract,
-  contractToCallAddress: string
-) => {
-  const iface = new Interface(["function safeMint(address to, string uri)"]);
-
-  const nftData: string = iface.encodeFunctionData("safeMint", [
-    fromAddress,
-    "some.token.uri",
-  ]);
-
-  // TODO: Read this from the contract
-  const nonce = parseInt(await forwarderContract.getNonce(fromAddress));
-
-  const message = {
-    from: fromAddress,
-    to: contractToCallAddress,
-    value: 0, // Not used
-    gas: 0, // Not used
-    nonce: nonce,
-    data: nftData,
-  };
-
-  // Note: this is hardhat's chain ID. Will need to be dynamic with the netwok you're on.
-  const chainId = 31337;
-
-  return {
-    // Note: this name and version has to match exactly with the constructor params in Forwarder.sol
-    domain: {
-      name: "MinimalForwarder",
-      version: "0.0.1",
-      chainId: chainId,
-      verifyingContract: forwarderContract.address,
-    },
-    types: {
-      ForwardRequest: [
-        {
-          name: "from",
-          type: "address",
-        },
-        {
-          name: "to",
-          type: "address",
-        },
-        {
-          name: "value",
-          type: "uint256",
-        },
-        {
-          name: "gas",
-          type: "uint256",
-        },
-        {
-          name: "nonce",
-          type: "uint256",
-        },
-        {
-          name: "data",
-          type: "bytes",
-        },
-      ],
-    },
-    message: message,
-  };
-};

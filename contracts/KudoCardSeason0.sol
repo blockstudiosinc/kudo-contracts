@@ -7,18 +7,10 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-import "./meta-transactions/ERC2771ContextUpdatable.sol";
-
 import "hardhat/console.sol";
 
 /// @custom:security-contact security@kudo.app
-contract KudoCardSeason0 is
-    ERC721,
-    ERC721URIStorage,
-    Pausable,
-    AccessControl,
-    ERC2771ContextUpdatable
-{
+contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
     using Counters for Counters.Counter;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -29,10 +21,7 @@ contract KudoCardSeason0 is
 
     event BatchMinted(address indexed to, string[] tokenURIs);
 
-    constructor()
-        ERC721("KUDO Card Season 0", "KUDO")
-        ERC2771ContextUpdatable(address(0))
-    {
+    constructor() ERC721("KUDO Card Season 0", "KUDO") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
@@ -117,25 +106,5 @@ contract KudoCardSeason0 is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
-    }
-
-    // Overrides for ERC2771ContextUpdatable for meta transactions
-
-    function _msgSender()
-        internal
-        view
-        override(ERC2771ContextUpdatable, Context)
-        returns (address sender)
-    {
-        return ERC2771ContextUpdatable._msgSender();
-    }
-
-    function _msgData()
-        internal
-        view
-        override(ERC2771ContextUpdatable, Context)
-        returns (bytes calldata)
-    {
-        return ERC2771ContextUpdatable._msgData();
     }
 }
