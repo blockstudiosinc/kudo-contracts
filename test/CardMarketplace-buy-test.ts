@@ -2,7 +2,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { TASK_DEPLOY_RUN_DEPLOY } from "hardhat-deploy";
 
 describe("CardMarketplace.buy()", function () {
   const tokenId = 1;
@@ -36,7 +35,8 @@ describe("CardMarketplace.buy()", function () {
     const CardMarketplace = await ethers.getContractFactory("CardMarketplace");
     marketContract = await CardMarketplace.connect(deployer).deploy(
       cardContract.address,
-      tokenContract.address
+      tokenContract.address,
+      ethers.constants.AddressZero
     );
     await marketContract.deployed();
 

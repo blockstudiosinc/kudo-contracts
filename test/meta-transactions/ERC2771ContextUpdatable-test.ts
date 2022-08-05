@@ -1,16 +1,35 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 describe("ERC2771ContextUpdatable", function () {
+  let contract: Contract;
+
+  let deployer: SignerWithAddress;
+  let forwarder: SignerWithAddress;
+  let newForwarder: SignerWithAddress;
+  let nonAdmin: SignerWithAddress;
+
+  beforeEach(async () => {
+    const [dep, fwd, newFwd, u] = await ethers.getSigners();
+
+    deployer = dep;
+    forwarder = fwd;
+    newForwarder = newFwd;
+    nonAdmin = u;
+
+    const CardMarketplace = await ethers.getContractFactory("CardMarketplace");
+    contract = await CardMarketplace.connect(deployer).deploy(
+      ethers.constants.AddressZero,
+      ethers.constants.AddressZero,
+      ethers.constants.AddressZero
+    );
+    await contract.deployed();
+  });
+
   describe("updateTrustedForwarder", async () => {
     it("works for admins", async () => {
-      const [deployer, forwarder, newForwarder] = await ethers.getSigners();
-
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy();
-      await contract.deployed();
       await contract
         .connect(deployer)
         .updateTrustedForwarder(forwarder.address);
@@ -27,13 +46,6 @@ describe("ERC2771ContextUpdatable", function () {
     });
 
     it("doesn't update to the same address or address 0", async () => {
-      const [deployer, forwarder] = await ethers.getSigners();
-
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy();
-      await contract.deployed();
       await contract
         .connect(deployer)
         .updateTrustedForwarder(forwarder.address);
@@ -54,14 +66,6 @@ describe("ERC2771ContextUpdatable", function () {
     });
 
     it("doesn't work for non-admins", async () => {
-      const [deployer, forwarder, newForwarder, user1] =
-        await ethers.getSigners();
-
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy();
-      await contract.deployed();
       await contract
         .connect(deployer)
         .updateTrustedForwarder(forwarder.address);
@@ -69,9 +73,9 @@ describe("ERC2771ContextUpdatable", function () {
       expect(await contract.trustedForwarder()).to.eq(forwarder.address);
 
       await expect(
-        contract.connect(user1).updateTrustedForwarder(newForwarder.address)
+        contract.connect(nonAdmin).updateTrustedForwarder(newForwarder.address)
       ).to.be.revertedWith(
-        `AccessControl: account ${user1.address.toLowerCase()} is missing role ${
+        `AccessControl: account ${nonAdmin.address.toLowerCase()} is missing role ${
           ethers.constants.HashZero
         }`
       );
