@@ -95,10 +95,20 @@ describe("Forwarder", function () {
 
       expect(await forwarderContract.getNonce(user1.address)).to.eq(0);
 
+      const iface = new Interface([
+        "function safeMint(address to, string uri)",
+      ]);
+
+      const functionSignatureAndCalldata: string = iface.encodeFunctionData(
+        "safeMint",
+        [user1.address, "some.token.uri"]
+      );
+
       const request = await buildRequest(
         user1.address,
         forwarderContract,
-        marketContract.address
+        marketContract.address,
+        functionSignatureAndCalldata
       );
 
       request.message.nonce = 999999;
