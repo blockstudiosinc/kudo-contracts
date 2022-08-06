@@ -125,10 +125,15 @@ describe("CardMarketplace meta transactions", function () {
         "function list(uint256 tokenId, uint256 price)",
       ]);
 
-      const functionSignatureAndCalldata: string = iface.encodeFunctionData(
-        "list",
-        [tokenId, price]
-      );
+      const functionSignature: string = iface.getSighash("list");
+
+      const functionSignatureAndCalldata: string = ethers.utils.hexConcat([
+        functionSignature,
+        ethers.utils.defaultAbiCoder.encode(
+          ["uint256", "uint256", "address"],
+          [tokenId, price, seller.address]
+        ),
+      ]);
 
       const request = await buildRequest(
         seller.address,
