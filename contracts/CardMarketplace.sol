@@ -113,6 +113,34 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         emit CardSold(listingId, listing.seller, buyer, listing.price);
     }
 
+    function getListings(address seller)
+        external
+        view
+        returns (Listing[] memory)
+    {
+        uint256 sellerCount = 0;
+        for (uint256 i = 1; i <= _listingIds.current(); ++i) {
+            if (listings[i].seller == seller) {
+                ++sellerCount;
+            }
+        }
+
+        Listing[] memory tokens = new Listing[](sellerCount);
+
+        uint256 index = 0;
+
+        for (uint256 i = 1; i <= _listingIds.current(); ++i) {
+            Listing memory listing = listings[i];
+
+            if (listing.seller == seller) {
+                tokens[index] = listing;
+                ++index;
+            }
+        }
+
+        return tokens;
+    }
+
     // ERC2771ContextUpdatable overrides for meta transactions
 
     function _msgSender()
