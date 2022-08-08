@@ -1,7 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { LogDescription } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 describe("CardMarketplace.list()", function () {
