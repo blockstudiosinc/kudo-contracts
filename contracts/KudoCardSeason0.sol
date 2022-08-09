@@ -18,8 +18,15 @@ contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
     Counters.Counter private _tokenIdCounter;
 
     mapping(string => bool) private _tokenURIs;
+    bool public hasRevokedSetTokenURI = false;
 
     event BatchMinted(address indexed to, string[] tokenURIs);
+    event TokenURIsUpdated(
+        address indexed updater,
+        uint256[] tokenIds,
+        string[] tokenURIs
+    );
+    event RevokedSetTokenURI(address indexed revoker);
 
     constructor() ERC721("KUDO Card Season 0", "KUDO") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -79,6 +86,30 @@ contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
         uint256 tokenId
     ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    // TokenURI updating
+
+    function setTokenURIs(
+        uint256[] calldata tokenIds,
+        string[] calldata tokenURIs
+    ) external onlyRole(MINTER_ROLE) {
+        require(hasRevokedSetTokenURI == false, "Revoked ability");
+        require(tokenIds.length > 0 && tokenURIs.length > 0, "Invalid data");
+        require(tokenIds.length == tokenURIs.length, "Data mismatch");
+
+        for (uint256 i = 0; i < tokenIds.length; ++i) {
+            _setTokenURI(tokenIds[i], tokenURIs[i]);
+        }
+
+        emit TokenURIsUpdated(msg.sender, tokenIds, tokenURIs);
+    }
+
+    function revokeSetTokenURI() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(hasRevokedSetTokenURI == false, "Already revoked");
+
+        hasRevokedSetTokenURI = true;
+        emit RevokedSetTokenURI(msg.sender);
     }
 
     // The following functions are overrides required by Solidity.
