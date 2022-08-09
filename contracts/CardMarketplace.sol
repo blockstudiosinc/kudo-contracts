@@ -125,7 +125,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
             }
         }
 
-        Listing[] memory listings = new Listing[](sellerCount);
+        Listing[] memory userListings = new Listing[](sellerCount);
 
         uint256 index = 0;
 
@@ -133,12 +133,12 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
             Listing memory listing = listings[i];
 
             if (listing.seller == seller) {
-                tokens[index] = listing;
+                userListings[index] = listing;
                 ++index;
             }
         }
 
-        return tokens;
+        return userListings;
     }
 
     // ERC2771ContextUpdatable overrides for meta transactions
