@@ -104,8 +104,17 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         listing.isSold = true;
 
         // Transfer payment
-        // TODO: add fee split
-        mUSDC.transferFrom(buyer, listing.seller, listing.price);
+        (address receiver, uint256 royaltyAmount) = kudoCard.royaltyInfo(
+            listing.tokenId,
+            listing.price
+        );
+
+        uint256 sellerAmount = listing.price - royaltyAmount;
+
+        // todo: checks in here?
+
+        mUSDC.transferFrom(buyer, listing.seller, sellerAmount);
+        mUSDC.transferFrom(buyer, receiver, royaltyAmount);
 
         // Transfer the NFT
         kudoCard.safeTransferFrom(address(this), buyer, listing.tokenId);

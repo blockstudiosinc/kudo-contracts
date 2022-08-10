@@ -14,12 +14,14 @@ describe("CardMarketplace.buy()", function () {
   let deployer: SignerWithAddress;
   let seller: SignerWithAddress;
   let buyer: SignerWithAddress;
+  let royaltyWallet: SignerWithAddress;
 
   beforeEach(async () => {
-    const [dep, signer1, signer2] = await ethers.getSigners();
+    const [dep, signer1, signer2, signer3] = await ethers.getSigners();
     deployer = dep;
     seller = signer1;
     buyer = signer2;
+    royaltyWallet = signer3;
 
     // mUSDC
     const TestERC20 = await ethers.getContractFactory("TestERC20");
@@ -30,6 +32,11 @@ describe("CardMarketplace.buy()", function () {
     const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
     cardContract = await KudoCardSeason0.connect(deployer).deploy();
     await cardContract.deployed();
+
+    // Set the royalty
+    await cardContract
+      .connect(deployer)
+      .setDefaultRoyalty(royaltyWallet.address, 1000); // 10%
 
     // Market
     const CardMarketplace = await ethers.getContractFactory("CardMarketplace");
@@ -102,8 +109,9 @@ describe("CardMarketplace.buy()", function () {
       marketContract.connect(buyer).buy(listingId)
     ).to.changeTokenBalances(
       tokenContract,
-      [seller, buyer],
-      [price, `-${price}`]
+      [seller, buyer, royaltyWallet],
+      // Seller gets 90%, buyer pays 100%, royalty 10%
+      [price.mul(9).div(10), `-${price}`, price.mul(1).div(10)]
     );
 
     // TODO can we also do these matchers?
