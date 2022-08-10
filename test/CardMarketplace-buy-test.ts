@@ -97,6 +97,8 @@ describe("CardMarketplace.buy()", function () {
     ).to.be.revertedWith("Invalid listing");
   });
 
+  // TODO: test for not enough balance to buy
+
   it("allows a user to buy", async () => {
     // Give the buyer some mUSDC
     await tokenContract.connect(deployer).transfer(buyer.address, price);
