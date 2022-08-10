@@ -27,7 +27,11 @@ contract KudoCardSeason0 is
     mapping(string => bool) private _tokenURIs;
     bool public hasRevokedSetTokenURI = false;
 
-    event BatchMinted(address indexed to, string[] tokenURIs);
+    event BatchMinted(
+        address indexed to,
+        uint256[] tokenIds,
+        string[] tokenURIs
+    );
     event TokenURIsUpdated(
         address indexed updater,
         uint256[] tokenIds,
@@ -68,10 +72,11 @@ contract KudoCardSeason0 is
         uint256[] memory tokenIds = new uint256[](length);
 
         for (uint256 i = 0; i < length; ++i) {
-            safeMint(to, tokenURIs[i]);
+            uint256 tokenId = safeMint(to, tokenURIs[i]);
+            tokenIds[i] = tokenId;
         }
 
-        emit BatchMinted(to, tokenURIs);
+        emit BatchMinted(to, tokenIds, tokenURIs);
 
         return tokenIds;
     }
@@ -79,6 +84,7 @@ contract KudoCardSeason0 is
     function safeMint(address to, string memory uri)
         public
         onlyRole(MINTER_ROLE)
+        returns (uint256)
     {
         require(_tokenURIs[uri] == false, "Already minted tokenURI");
 
@@ -86,10 +92,13 @@ contract KudoCardSeason0 is
         _tokenURIs[uri] = true;
 
         _tokenIdCounter.increment();
+
         uint256 tokenId = _tokenIdCounter.current();
 
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+
+        return tokenId;
     }
 
     function _beforeTokenTransfer(

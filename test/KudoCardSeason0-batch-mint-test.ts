@@ -20,7 +20,7 @@ describe("KudoCardSeason0", function () {
         contract.connect(deployer).batchMint(user1.address, tokenUris)
       )
         .to.emit(contract, "BatchMinted")
-        .withArgs(user1.address, tokenUris);
+        .withArgs(user1.address, [1, 2, 3], tokenUris);
 
       expect(await contract.balanceOf(user1.address)).to.eq(3);
     });
