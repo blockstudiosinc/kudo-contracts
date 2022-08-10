@@ -97,7 +97,29 @@ describe("CardMarketplace.buy()", function () {
     ).to.be.revertedWith("Invalid listing");
   });
 
-  // TODO: test for not enough balance to buy
+  it("reverts if the buyer hasn't approved the market to spend their token", async () => {
+    // Give the buyer some mUSDC, but not enough
+    await tokenContract.connect(deployer).transfer(buyer.address, price);
+
+    // No approval
+    // await tokenContract.connect(buyer).approve(marketContract.address, price);
+
+    await expect(
+      marketContract.connect(buyer).buy(listingId)
+    ).to.be.revertedWith("ERC20: insufficient allowance");
+  });
+
+  it("reverts if the buy doesn't have enough to buy", async () => {
+    // Give the buyer some mUSDC, but not enough
+    await tokenContract.connect(deployer).transfer(buyer.address, price.div(2));
+
+    // Approve the marketplace to spend your mUSDC
+    await tokenContract.connect(buyer).approve(marketContract.address, price);
+
+    await expect(
+      marketContract.connect(buyer).buy(listingId)
+    ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+  });
 
   it("allows a user to buy", async () => {
     // Give the buyer some mUSDC

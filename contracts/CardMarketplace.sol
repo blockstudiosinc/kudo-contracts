@@ -111,7 +111,6 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
 
         uint256 sellerAmount = listing.price - royaltyAmount;
 
-        // TODO: Test and check here
         mUSDC.transferFrom(buyer, listing.seller, sellerAmount);
         mUSDC.transferFrom(buyer, royaltyWallet, royaltyAmount);
 
