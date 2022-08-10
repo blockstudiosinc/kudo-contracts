@@ -149,4 +149,33 @@ describe("CardMarketplace.buy()", function () {
     expect(await cardContract.balanceOf(marketContract.address)).to.eq(0);
     expect(await cardContract.balanceOf(buyer.address)).to.eq(1);
   });
+
+  it("allows a user to buy with no royalty", async () => {
+    // Set the royalty
+    await cardContract
+      .connect(deployer)
+      .setDefaultRoyalty(royaltyWallet.address, 0);
+
+    // Give the buyer some mUSDC
+    await tokenContract.connect(deployer).transfer(buyer.address, price);
+
+    // Approve the marketplace to spend your mUSDC
+    await tokenContract.connect(buyer).approve(marketContract.address, price);
+
+    // Buy
+    await expect(() =>
+      marketContract.connect(buyer).buy(listingId)
+    ).to.changeTokenBalances(
+      tokenContract,
+      [seller, buyer, royaltyWallet],
+      [price, `-${price}`, 0]
+    );
+
+    expect((await marketContract.listings(listingId)).isActive).to.eq(false);
+    expect((await marketContract.listings(listingId)).isSold).to.eq(true);
+
+    // Buyer owns NFT now
+    expect(await cardContract.balanceOf(marketContract.address)).to.eq(0);
+    expect(await cardContract.balanceOf(buyer.address)).to.eq(1);
+  });
 });

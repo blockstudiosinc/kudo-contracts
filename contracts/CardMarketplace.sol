@@ -111,6 +111,12 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
 
         uint256 sellerAmount = listing.price - royaltyAmount;
 
+        // Extra precaution
+        require(
+            sellerAmount <= listing.price && royaltyAmount < sellerAmount,
+            "Invalid royalties"
+        );
+
         mUSDC.transferFrom(buyer, listing.seller, sellerAmount);
         mUSDC.transferFrom(buyer, royaltyWallet, royaltyAmount);
 
