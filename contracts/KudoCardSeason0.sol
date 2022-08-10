@@ -6,11 +6,18 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
 import "hardhat/console.sol";
 
 /// @custom:security-contact security@kudo.app
-contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
+contract KudoCardSeason0 is
+    ERC721,
+    ERC721URIStorage,
+    ERC2981,
+    Pausable,
+    AccessControl
+{
     using Counters for Counters.Counter;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -27,6 +34,11 @@ contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
         string[] tokenURIs
     );
     event RevokedSetTokenURI(address indexed revoker);
+    event RoyaltyUpdated(
+        address indexed updater,
+        address indexed receiver,
+        uint256 indexed feeNumerator
+    );
 
     constructor() ERC721("KUDO Card Season 0", "KUDO") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -112,6 +124,18 @@ contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
         emit RevokedSetTokenURI(msg.sender);
     }
 
+    // Royalties
+
+    function setDefaultRoyalty(address receiver, uint96 feeNumerator)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(feeNumerator <= 1000, "Fee too high");
+
+        _setDefaultRoyalty(receiver, feeNumerator);
+        emit RoyaltyUpdated(msg.sender, receiver, feeNumerator);
+    }
+
     // The following functions are overrides required by Solidity.
 
     function _burn(uint256 tokenId)
@@ -133,7 +157,7 @@ contract KudoCardSeason0 is ERC721, ERC721URIStorage, Pausable, AccessControl {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, AccessControl)
+        override(ERC2981, ERC721, AccessControl)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
