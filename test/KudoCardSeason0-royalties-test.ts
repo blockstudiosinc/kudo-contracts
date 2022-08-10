@@ -16,7 +16,6 @@ describe("KudoCardSeason0 royalties", function () {
     admin = deployer;
     user1 = signer1;
     royaltyWallet = signer2;
-    // user2 = signer2;
 
     const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
     contract = await KudoCardSeason0.connect(deployer).deploy();
