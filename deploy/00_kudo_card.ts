@@ -21,13 +21,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const adminWallets = process.env.ADMIN_WALLETS?.split(",") || [];
 
   for (let i = 0; i < adminWallets.length; ++i) {
-    console.log("Setting admin wallet", adminWallets[i]);
-
     const role = await kudoCard.DEFAULT_ADMIN_ROLE();
-    const txn = await kudoCard.grantRole(role, adminWallets[i], {
-      gasLimit: 300_000,
-    });
-    await txn.wait();
+    const address: string = adminWallets[i];
+
+    const hasRole: boolean = await kudoCard.hasRole(role, address);
+
+    if (!hasRole) {
+      console.log("Setting admin role for", address);
+
+      const txn = await kudoCard.grantRole(role, address, {
+        gasLimit: 300_000,
+      });
+      await txn.wait();
+    } else {
+      console.log("Admin role already set for", address);
+    }
   }
 };
 export default func;
