@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@ensdomains/ens-contracts/contracts/ethregistrar/StringUtils.sol";
+import "contracts/utils/Substring.sol";
 
 import "hardhat/console.sol";
 
@@ -20,7 +21,8 @@ contract KudoCardSeason0 is
     AccessControl
 {
     using Counters for Counters.Counter;
-    using StringUtils for *;
+    using StringUtils for string;
+    using Substring for string;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -126,9 +128,7 @@ contract KudoCardSeason0 is
         for (uint256 i = 0; i < tokenIds.length; ++i) {
             // Contains baseURI prefix
             string memory fullOldURI = tokenURI(tokenIds[i]);
-
-            string memory oldURI = substring(
-                fullOldURI,
+            string memory oldURI = fullOldURI.substring(
                 prefixLength,
                 fullOldURI.strlen()
             );
@@ -141,19 +141,6 @@ contract KudoCardSeason0 is
         }
 
         emit TokenURIsUpdated(msg.sender, tokenIds, uris);
-    }
-
-    function substring(
-        string memory str,
-        uint256 startIndex,
-        uint256 endIndex
-    ) public pure returns (string memory) {
-        bytes memory strBytes = bytes(str);
-        bytes memory result = new bytes(endIndex - startIndex);
-        for (uint256 i = startIndex; i < endIndex; i++) {
-            result[i - startIndex] = strBytes[i];
-        }
-        return string(result);
     }
 
     function revokeSetTokenURI() external onlyRole(DEFAULT_ADMIN_ROLE) {
