@@ -28,7 +28,7 @@ contract KudoCardSeason0 is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
 
-    mapping(string => bool) public tokenURIs;
+    mapping(string => uint256) public tokenURIs;
     bool public hasRevokedSetTokenURI = false;
 
     event BatchMinted(
@@ -90,14 +90,13 @@ contract KudoCardSeason0 is
         onlyRole(MINTER_ROLE)
         returns (uint256)
     {
-        require(tokenURIs[uri] == false, "Already minted tokenURI");
-
-        // Prevent duplicate URIs
-        tokenURIs[uri] = true;
+        require(tokenURIs[uri] == 0, "Already minted tokenURI");
 
         _tokenIdCounter.increment();
-
         uint256 tokenId = _tokenIdCounter.current();
+
+        // Prevent duplicate URIs
+        tokenURIs[uri] = tokenId;
 
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
@@ -126,18 +125,19 @@ contract KudoCardSeason0 is
         uint256 prefixLength = _baseURI().strlen();
 
         for (uint256 i = 0; i < tokenIds.length; ++i) {
+            uint256 tokenId = tokenIds[i];
+
             // Contains baseURI prefix
-            string memory fullOldURI = tokenURI(tokenIds[i]);
+            string memory fullOldURI = tokenURI(tokenId);
             string memory oldURI = fullOldURI.substring(
                 prefixLength,
                 fullOldURI.strlen()
             );
-
-            tokenURIs[oldURI] = false;
+            tokenURIs[oldURI] = 0;
 
             string calldata newURI = uris[i];
             _setTokenURI(tokenIds[i], newURI);
-            tokenURIs[newURI] = true;
+            tokenURIs[newURI] = tokenId;
         }
 
         emit TokenURIsUpdated(msg.sender, tokenIds, uris);
