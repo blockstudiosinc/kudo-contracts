@@ -83,6 +83,13 @@ describe("KudoCardSeason0 upgrade metadata", function () {
       expect(await contract.tokenURI(1)).to.eq("ipfs://new-uri-1");
       expect(await contract.tokenURI(3)).to.eq("ipfs://new-uri-3");
 
+      // Old URIs no longer in use, new URIs in use
+      expect(await contract.tokenURIs("token-uri-1")).to.eq(false);
+      expect(await contract.tokenURIs("token-uri-3")).to.eq(false);
+
+      expect(await contract.tokenURIs("new-uri-1")).to.eq(true);
+      expect(await contract.tokenURIs("new-uri-3")).to.eq(true);
+
       // No change
       expect(await contract.tokenURI(2)).to.eq("ipfs://token-uri-2");
     });

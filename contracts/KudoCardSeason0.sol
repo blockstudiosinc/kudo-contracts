@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@ensdomains/ens-contracts/contracts/ethregistrar/StringUtils.sol";
+import "contracts/utils/Substring.sol";
 
 import "hardhat/console.sol";
 
@@ -19,12 +21,14 @@ contract KudoCardSeason0 is
     AccessControl
 {
     using Counters for Counters.Counter;
+    using StringUtils for string;
+    using Substring for string;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
 
-    mapping(string => bool) private _tokenURIs;
+    mapping(string => bool) public tokenURIs;
     bool public hasRevokedSetTokenURI = false;
 
     event BatchMinted(
@@ -62,21 +66,21 @@ contract KudoCardSeason0 is
         _unpause();
     }
 
-    function batchMint(address to, string[] calldata tokenURIs)
+    function batchMint(address to, string[] calldata uris)
         public
         onlyRole(MINTER_ROLE)
         returns (uint256[] memory)
     {
-        uint256 length = tokenURIs.length;
+        uint256 length = uris.length;
 
         uint256[] memory tokenIds = new uint256[](length);
 
         for (uint256 i = 0; i < length; ++i) {
-            uint256 tokenId = safeMint(to, tokenURIs[i]);
+            uint256 tokenId = safeMint(to, uris[i]);
             tokenIds[i] = tokenId;
         }
 
-        emit BatchMinted(to, tokenIds, tokenURIs);
+        emit BatchMinted(to, tokenIds, uris);
 
         return tokenIds;
     }
@@ -86,10 +90,10 @@ contract KudoCardSeason0 is
         onlyRole(MINTER_ROLE)
         returns (uint256)
     {
-        require(_tokenURIs[uri] == false, "Already minted tokenURI");
+        require(tokenURIs[uri] == false, "Already minted tokenURI");
 
         // Prevent duplicate URIs
-        _tokenURIs[uri] = true;
+        tokenURIs[uri] = true;
 
         _tokenIdCounter.increment();
 
@@ -111,19 +115,32 @@ contract KudoCardSeason0 is
 
     // TokenURI updating
 
-    function setTokenURIs(
-        uint256[] calldata tokenIds,
-        string[] calldata tokenURIs
-    ) external onlyRole(MINTER_ROLE) {
+    function setTokenURIs(uint256[] calldata tokenIds, string[] calldata uris)
+        external
+        onlyRole(MINTER_ROLE)
+    {
         require(hasRevokedSetTokenURI == false, "Revoked ability");
-        require(tokenIds.length > 0 && tokenURIs.length > 0, "Invalid data");
-        require(tokenIds.length == tokenURIs.length, "Data mismatch");
+        require(tokenIds.length > 0 && uris.length > 0, "Invalid data");
+        require(tokenIds.length == uris.length, "Data mismatch");
+
+        uint256 prefixLength = _baseURI().strlen();
 
         for (uint256 i = 0; i < tokenIds.length; ++i) {
-            _setTokenURI(tokenIds[i], tokenURIs[i]);
+            // Contains baseURI prefix
+            string memory fullOldURI = tokenURI(tokenIds[i]);
+            string memory oldURI = fullOldURI.substring(
+                prefixLength,
+                fullOldURI.strlen()
+            );
+
+            tokenURIs[oldURI] = false;
+
+            string calldata newURI = uris[i];
+            _setTokenURI(tokenIds[i], newURI);
+            tokenURIs[newURI] = true;
         }
 
-        emit TokenURIsUpdated(msg.sender, tokenIds, tokenURIs);
+        emit TokenURIsUpdated(msg.sender, tokenIds, uris);
     }
 
     function revokeSetTokenURI() external onlyRole(DEFAULT_ADMIN_ROLE) {
