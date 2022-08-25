@@ -1,6 +1,6 @@
 name: Hardhat Test
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   test:
@@ -10,5 +10,8 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 16
-    - run: npm ci
-    - run: npm test
+    - name: Run Test
+      run: |
+        npm -v
+        npm ci
+        npm test
