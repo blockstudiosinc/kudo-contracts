@@ -12,6 +12,8 @@ jobs:
       with:
         node-version: 16
     - name: Run Test
+      env:
+        PRIVATE_KEY: 0xabc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1
       # https://github.com/npm/cli/issues/4664
       run: |
         npm -v
