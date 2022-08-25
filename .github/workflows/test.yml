@@ -1,0 +1,22 @@
+name: Hardhat Test
+
+on: [pull_request]
+
+jobs:
+  test:
+    name: Hardhat Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Run Test
+      env:
+        PRIVATE_KEY: "0xabc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1"
+      # https://github.com/npm/cli/issues/4664
+      run: |
+        npm -v
+        npm config set legacy-peer-deps=true --location=project
+        npm ci
+        npm test
