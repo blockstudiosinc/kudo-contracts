@@ -45,6 +45,11 @@ describe("CardMarketplace meta transactions", function () {
     );
     await marketContract.deployed();
 
+    // Auto-approve the market
+    await cardContract
+      .connect(adminWallet)
+      .setApprovedMarket(marketContract.address, true);
+
     // Mint NFT
     await cardContract
       .connect(adminWallet)

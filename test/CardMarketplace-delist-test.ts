@@ -36,6 +36,11 @@ describe("CardMarketplace.delist()", function () {
     );
     await marketContract.deployed();
 
+    // Auto-approve the market
+    await cardContract
+      .connect(deployer)
+      .setApprovedMarket(marketContract.address, true);
+
     // Mint NFT
     await cardContract
       .connect(deployer)

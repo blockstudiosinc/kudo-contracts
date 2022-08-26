@@ -35,6 +35,11 @@ describe("CardMarketplace.list()", function () {
     );
     await marketContract.deployed();
 
+    // Auto-approve the market
+    await cardContract
+      .connect(deployer)
+      .setApprovedMarket(marketContract.address, true);
+
     // TODO: End-to-end tests using meta tx's
     //
     // Normally we'd set this, but for these tests we'll call the functions directly
