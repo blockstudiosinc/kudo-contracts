@@ -48,9 +48,6 @@ describe("CardMarketplace.list()", function () {
       .connect(deployer)
       .safeMint(user1.address, "some-token-uri");
     expect(await cardContract.balanceOf(user1.address)).to.eq(1);
-
-    // Manually approve for ease of testing without meta tx's
-    await cardContract.connect(user1).approve(marketContract.address, tokenId);
   });
 
   it("reverts if the user isn't owner of the NFT", async () => {

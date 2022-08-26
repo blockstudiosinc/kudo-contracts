@@ -50,9 +50,6 @@ describe("CardMarketplace meta transactions", function () {
       .connect(adminWallet)
       .safeMint(seller.address, "some-token-uri");
     expect(await cardContract.balanceOf(seller.address)).to.eq(1);
-
-    // Approve market to list
-    await cardContract.connect(seller).approve(marketContract.address, tokenId);
   });
 
   describe("meta transactions", async () => {

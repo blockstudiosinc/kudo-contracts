@@ -42,11 +42,6 @@ describe("CardMarketplace.delist()", function () {
       .safeMint(user1.address, "some-token-uri");
     expect(await cardContract.balanceOf(user1.address)).to.eq(1);
 
-    // Manually approve for ease of testing without meta tx's
-    await cardContract
-      .connect(user1)
-      .setApprovalForAll(marketContract.address, true);
-
     // List the NFT
     await marketContract.connect(user1).list(tokenId, 1000);
   });

@@ -29,7 +29,10 @@ contract KudoCardSeason0 is
     Counters.Counter private _tokenIdCounter;
 
     mapping(string => uint256) public tokenURIs;
+    mapping(address => bool) public approvedMarkets;
+
     bool public hasRevokedSetTokenURI = false;
+    bool public hasRevokedUpdateApprovedMarkets = false;
 
     event BatchMinted(
         address indexed to,
@@ -47,6 +50,12 @@ contract KudoCardSeason0 is
         address indexed receiver,
         uint256 indexed feeNumerator
     );
+    event ApprovedMarketUpdated(
+        address indexed updater,
+        address indexed market,
+        bool indexed approved
+    );
+    event RevokedUpdateApprovedMarkets(address indexed revoker);
 
     constructor() ERC721("KUDO Card Season 0", "KUDO") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -110,6 +119,41 @@ contract KudoCardSeason0 is
         uint256 tokenId
     ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    // Auto-approve select marketplaces to save gas and better UX
+
+    function setApprovedMarket(address market, bool approved)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(hasRevokedUpdateApprovedMarkets == false, "Ability revoked");
+
+        approvedMarkets[market] = approved;
+        emit ApprovedMarketUpdated(msg.sender, market, approved);
+    }
+
+    function isApprovedForAll(address owner, address operator)
+        public
+        view
+        override
+        returns (bool)
+    {
+        if (approvedMarkets[operator]) {
+            return true;
+        }
+
+        return ERC721.isApprovedForAll(owner, operator);
+    }
+
+    function revokeUpdateApprovedMarkets()
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(hasRevokedUpdateApprovedMarkets == false, "Already revoked");
+
+        hasRevokedUpdateApprovedMarkets = true;
+        emit RevokedUpdateApprovedMarkets(msg.sender);
     }
 
     // TokenURI updating

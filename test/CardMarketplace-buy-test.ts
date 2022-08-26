@@ -53,9 +53,6 @@ describe("CardMarketplace.buy()", function () {
       .safeMint(seller.address, "some-token-uri");
     expect(await cardContract.balanceOf(seller.address)).to.eq(1);
 
-    // Approve contract to list
-    await cardContract.connect(seller).approve(marketContract.address, tokenId);
-
     // List NFT
     await marketContract.connect(seller).list(tokenId, price);
     expect((await marketContract.listings(listingId)).isActive).to.eq(true);
@@ -100,9 +97,6 @@ describe("CardMarketplace.buy()", function () {
   it("reverts if the buyer hasn't approved the market to spend their token", async () => {
     // Give the buyer some mUSDC, but not enough
     await tokenContract.connect(deployer).transfer(buyer.address, price);
-
-    // No approval
-    // await tokenContract.connect(buyer).approve(marketContract.address, price);
 
     await expect(
       marketContract.connect(buyer).buy(listingId)
