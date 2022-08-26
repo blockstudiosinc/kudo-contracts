@@ -4,7 +4,7 @@
     "test": "npx hardhat test",
     "testnet-deploy": "npx hardhat deploy --network mumbai && npx hardhat --network mumbai etherscan-verify",
     "testnet-verify": "npx hardhat --network mumbai etherscan-verify",
-    "testnet-deploy-export": "npx hardhat deploy --network mumbai --export-all ../kudo-api/abis.json"
+    "testnet-deploy-export": "npx hardhat deploy --network mumbai --export-all ../kudo-api/abis.ts"
   },
   "devDependencies": {
     "@ensdomains/ens-contracts": "^0.0.12",

@@ -45,14 +45,16 @@ describe("CardMarketplace meta transactions", function () {
     );
     await marketContract.deployed();
 
+    // Auto-approve the market
+    await cardContract
+      .connect(adminWallet)
+      .setApprovedMarket(marketContract.address, true);
+
     // Mint NFT
     await cardContract
       .connect(adminWallet)
       .safeMint(seller.address, "some-token-uri");
     expect(await cardContract.balanceOf(seller.address)).to.eq(1);
-
-    // Approve market to list
-    await cardContract.connect(seller).approve(marketContract.address, tokenId);
   });
 
   describe("meta transactions", async () => {

@@ -35,6 +35,11 @@ describe("CardMarketplace.list()", function () {
     );
     await marketContract.deployed();
 
+    // Auto-approve the market
+    await cardContract
+      .connect(deployer)
+      .setApprovedMarket(marketContract.address, true);
+
     // TODO: End-to-end tests using meta tx's
     //
     // Normally we'd set this, but for these tests we'll call the functions directly
@@ -48,9 +53,6 @@ describe("CardMarketplace.list()", function () {
       .connect(deployer)
       .safeMint(user1.address, "some-token-uri");
     expect(await cardContract.balanceOf(user1.address)).to.eq(1);
-
-    // Manually approve for ease of testing without meta tx's
-    await cardContract.connect(user1).approve(marketContract.address, tokenId);
   });
 
   it("reverts if the user isn't owner of the NFT", async () => {

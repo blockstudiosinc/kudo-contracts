@@ -47,13 +47,10 @@ describe("CardMarketplace.list()", function () {
       .safeMint(user1.address, "some-token-uri-3");
     expect(await cardContract.balanceOf(user1.address)).to.eq(2);
 
-    // Approve the transfer
+    // Auto-approve the market
     await cardContract
-      .connect(user1)
-      .setApprovalForAll(marketContract.address, true);
-    await cardContract
-      .connect(user2)
-      .setApprovalForAll(marketContract.address, true);
+      .connect(deployer)
+      .setApprovedMarket(marketContract.address, true);
 
     // List the NFTs
     await marketContract.connect(user1).list(tokenId, 1000);
