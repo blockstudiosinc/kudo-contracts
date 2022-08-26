@@ -70,7 +70,7 @@ describe("CardMarketplace.delist()", function () {
   it("allows a user to delist their NFT", async () => {
     await expect(marketContract.connect(user1).delist(listingId))
       .to.emit(marketContract, "CardDelisted")
-      .withArgs(listingId, user1.address);
+      .withArgs(listingId, user1.address, tokenId);
 
     // User owns NFT again
     expect((await marketContract.listings(listingId)).isActive).to.eq(false);

@@ -35,7 +35,11 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         uint256 indexed tokenId,
         uint256 indexed price
     );
-    event CardDelisted(uint256 indexed listingId, address indexed seller);
+    event CardDelisted(
+        uint256 indexed listingId,
+        address indexed seller,
+        uint256 indexed tokenId
+    );
     event CardSold(
         uint256 listingId,
         address indexed seller,
@@ -88,7 +92,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         listing.isActive = false;
         kudoCard.transferFrom(address(this), listing.seller, listing.tokenId);
 
-        emit CardDelisted(listingId, seller);
+        emit CardDelisted(listingId, seller, listing.tokenId);
     }
 
     function buy(uint256 listingId) external nonReentrant {
