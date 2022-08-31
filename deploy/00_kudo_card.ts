@@ -12,11 +12,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  // Set the admins
   const KudoCard = await ethers.getContractFactory("KudoCard");
   const kudoCard = await KudoCard.attach(deployment.address);
 
-  console.log("Setting admin wallets");
+  // Set the royalty info
+  if (!process.env.ROYALTY_WALLET) {
+    throw new Error("ROYALTY_WALLET not set");
+  }
+
+  if (!process.env.ROYALTY_AMOUNT_BASIS) {
+    throw new Error("ROYALTY_AMOUNT_BASIS not set");
+  }
+
+  console.log(
+    `Setting royalty wallet and amount basis: ${process.env.ROYALTY_WALLET}, ${process.env.ROYALTY_AMOUNT_BASIS}`
+  );
+
+  await kudoCard.setDefaultRoyalty(
+    process.env.ROYALTY_WALLET,
+    process.env.ROYALTY_AMOUNT_BASIS
+  );
+
+  // Set the admins
+  console.log("Setting admin wallets...");
 
   const adminWallets = process.env.ADMIN_WALLETS?.split(",") || [];
 
