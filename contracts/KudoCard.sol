@@ -57,7 +57,7 @@ contract KudoCard is
     );
     event RevokedUpdateApprovedMarkets(address indexed revoker);
 
-    constructor() ERC721("KUDO Card Season 0", "KUDO") {
+    constructor() ERC721("KUDO Card", "KUDO") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);

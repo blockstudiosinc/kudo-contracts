@@ -46,14 +46,6 @@ describe("CardMarketplace pause", function () {
       .connect(deployer)
       .setApprovedMarket(marketContract.address, true);
 
-    // TODO: End-to-end tests using meta tx's
-    //
-    // Normally we'd set this, but for these tests we'll call the functions directly
-    // to avoid a bunch of test setup around meta tx's
-    // await cardContract
-    //   .connect(deployer)
-    //   .updateTrustedForwarder(marketContract.address);
-
     // Mint NFT
     await cardContract
       .connect(deployer)
