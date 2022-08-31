@@ -33,11 +33,6 @@ describe("CardMarketplace.buy()", function () {
     cardContract = await KudoCard.connect(deployer).deploy();
     await cardContract.deployed();
 
-    // Set the royalty
-    await cardContract
-      .connect(deployer)
-      .setDefaultRoyalty(royaltyWallet.address, 1000); // 10%
-
     // Market
     const CardMarketplace = await ethers.getContractFactory("CardMarketplace");
     marketContract = await CardMarketplace.connect(deployer).deploy(
@@ -84,6 +79,11 @@ describe("CardMarketplace.buy()", function () {
   });
 
   it("reverts if the listing is already sold", async () => {
+    // Set the royalty
+    await cardContract
+      .connect(deployer)
+      .setDefaultRoyalty(royaltyWallet.address, 10);
+
     // Give the buyer some mUSDC
     await tokenContract.connect(deployer).transfer(buyer.address, price);
 
@@ -100,6 +100,11 @@ describe("CardMarketplace.buy()", function () {
   });
 
   it("reverts if the buyer hasn't approved the market to spend their token", async () => {
+    // Set the royalty
+    await cardContract
+      .connect(deployer)
+      .setDefaultRoyalty(royaltyWallet.address, 10);
+
     // Give the buyer some mUSDC, but not enough
     await tokenContract.connect(deployer).transfer(buyer.address, price);
 
@@ -108,7 +113,25 @@ describe("CardMarketplace.buy()", function () {
     ).to.be.revertedWith("ERC20: insufficient allowance");
   });
 
-  it("reverts if the buy doesn't have enough to buy", async () => {
+  it("reverts if the royalty info isn't set", async () => {
+    // Give the buyer some mUSDC
+    await tokenContract.connect(deployer).transfer(buyer.address, price);
+
+    // Approve the marketplace to spend your mUSDC
+    await tokenContract.connect(buyer).approve(marketContract.address, price);
+
+    // Buy
+    await expect(
+      marketContract.connect(buyer).buy(listingId)
+    ).to.be.revertedWith("Royalty not set");
+  });
+
+  it("reverts if the buyer doesn't have enough to buy", async () => {
+    // Set the royalty
+    await cardContract
+      .connect(deployer)
+      .setDefaultRoyalty(royaltyWallet.address, 10);
+
     // Give the buyer some mUSDC, but not enough
     await tokenContract.connect(deployer).transfer(buyer.address, price.div(2));
 
@@ -121,6 +144,11 @@ describe("CardMarketplace.buy()", function () {
   });
 
   it("allows a user to buy", async () => {
+    // Set the royalty
+    await cardContract
+      .connect(deployer)
+      .setDefaultRoyalty(royaltyWallet.address, 1000); // 10%
+
     // Give the buyer some mUSDC
     await tokenContract.connect(deployer).transfer(buyer.address, price);
 
