@@ -32,8 +32,8 @@ describe("CardMarketplace meta transactions", function () {
     await forwarderContract.deployed();
 
     // Card
-    const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
-    cardContract = await KudoCardSeason0.connect(adminWallet).deploy();
+    const KudoCard = await ethers.getContractFactory("KudoCard");
+    cardContract = await KudoCard.connect(adminWallet).deploy();
     await cardContract.deployed();
 
     // Market

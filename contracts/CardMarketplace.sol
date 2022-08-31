@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./meta-transactions/ERC2771ContextUpdatable.sol";
-import "./KudoCardSeason0.sol";
+import "./KudoCard.sol";
 
 import "hardhat/console.sol";
 
@@ -14,7 +14,7 @@ import "hardhat/console.sol";
 contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     using Counters for Counters.Counter;
 
-    KudoCardSeason0 public immutable kudoCard;
+    KudoCard public immutable kudoCard;
     IERC20 public immutable mUSDC;
 
     Counters.Counter public _listingIds;
@@ -52,7 +52,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         address _mUSDC,
         address _trustedForwarder
     ) ERC2771ContextUpdatable(_trustedForwarder) {
-        kudoCard = KudoCardSeason0(_kudoCard);
+        kudoCard = KudoCard(_kudoCard);
         mUSDC = IERC20(_mUSDC);
     }
 

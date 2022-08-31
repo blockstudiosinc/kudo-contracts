@@ -4,7 +4,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { experimentalAddHardhatNetworkMessageTraceHook } from "hardhat/config";
 
-describe("KudoCardSeason0 approved markets", function () {
+describe("KudoCard approved markets", function () {
   let contract: Contract;
   let admin: SignerWithAddress,
     user1: SignerWithAddress,
@@ -16,8 +16,8 @@ describe("KudoCardSeason0 approved markets", function () {
     user1 = signer1;
     user2 = signer2;
 
-    const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
-    contract = await KudoCardSeason0.connect(deployer).deploy();
+    const KudoCard = await ethers.getContractFactory("KudoCard");
+    contract = await KudoCard.connect(deployer).deploy();
     await contract.deployed();
   });
 
