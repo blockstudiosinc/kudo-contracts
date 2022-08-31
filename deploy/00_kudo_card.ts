@@ -6,15 +6,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = hre.deployments;
   const { deployer } = await hre.getNamedAccounts();
 
-  const deployment: Deployment = await deploy("KudoCardSeason0", {
+  const deployment: Deployment = await deploy("KudoCard", {
     from: deployer,
     args: [],
     log: true,
   });
 
   // Set the admins
-  const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
-  const kudoCard = await KudoCardSeason0.attach(deployment.address);
+  const KudoCard = await ethers.getContractFactory("KudoCard");
+  const kudoCard = await KudoCard.attach(deployment.address);
 
   console.log("Setting admin wallets");
 

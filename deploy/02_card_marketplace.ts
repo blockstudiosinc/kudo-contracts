@@ -6,9 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = hre.deployments;
   const { deployer } = await hre.getNamedAccounts();
 
-  const cardDeployment: Deployment = await hre.deployments.get(
-    "KudoCardSeason0"
-  );
+  const cardDeployment: Deployment = await hre.deployments.get("KudoCard");
   const forwarder: Deployment = await hre.deployments.get("Forwarder");
 
   // TODO: Make this dynamic for prod/testnet
@@ -23,8 +21,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Approve the marketplace
   console.log("Approving marketplace");
 
-  const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
-  const kudoCard = await KudoCardSeason0.attach(cardDeployment.address);
+  const KudoCard = await ethers.getContractFactory("KudoCard");
+  const kudoCard = await KudoCard.attach(cardDeployment.address);
   await kudoCard.setApprovedMarket(deployment.address, true);
 };
 export default func;

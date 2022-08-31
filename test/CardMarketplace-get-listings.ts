@@ -19,8 +19,8 @@ describe("CardMarketplace.list()", function () {
     user3 = signer3;
 
     // Card
-    const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
-    cardContract = await KudoCardSeason0.connect(deployer).deploy();
+    const KudoCard = await ethers.getContractFactory("KudoCard");
+    cardContract = await KudoCard.connect(deployer).deploy();
     await cardContract.deployed();
 
     // Market

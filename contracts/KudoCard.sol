@@ -13,7 +13,7 @@ import "contracts/utils/Substring.sol";
 import "hardhat/console.sol";
 
 /// @custom:security-contact security@kudo.app
-contract KudoCardSeason0 is
+contract KudoCard is
     ERC721,
     ERC721URIStorage,
     ERC2981,

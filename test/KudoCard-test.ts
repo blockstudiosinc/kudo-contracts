@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-describe("KudoCardSeason0", function () {
+describe("KudoCard", function () {
   let contract: Contract;
   let admin: SignerWithAddress,
     user1: SignerWithAddress,
@@ -15,8 +15,8 @@ describe("KudoCardSeason0", function () {
     user1 = signer1;
     user2 = signer2;
 
-    const KudoCardSeason0 = await ethers.getContractFactory("KudoCardSeason0");
-    contract = await KudoCardSeason0.connect(deployer).deploy();
+    const KudoCard = await ethers.getContractFactory("KudoCard");
+    contract = await KudoCard.connect(deployer).deploy();
     await contract.deployed();
   });
 

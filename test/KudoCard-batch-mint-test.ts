@@ -1,17 +1,15 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("KudoCardSeason0", function () {
+describe("KudoCard", function () {
   describe("batchMint()", async () => {
     const tokenUris = ["uri-1", "uri-2", "uri-3"];
 
     it("MINTER_ROLE can mint a list of tokenURIs", async () => {
       const [deployer, user1] = await ethers.getSigners();
 
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy();
+      const KudoCard = await ethers.getContractFactory("KudoCard");
+      const contract = await KudoCard.connect(deployer).deploy();
       await contract.deployed();
 
       expect(await contract.balanceOf(user1.address)).to.eq(0);
@@ -28,10 +26,8 @@ describe("KudoCardSeason0", function () {
     it("can only be called by MINTER_ROLE", async () => {
       const [deployer, user1] = await ethers.getSigners();
 
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy();
+      const KudoCard = await ethers.getContractFactory("KudoCard");
+      const contract = await KudoCard.connect(deployer).deploy();
       await contract.deployed();
 
       expect(await contract.balanceOf(user1.address)).to.eq(0);
@@ -50,10 +46,8 @@ describe("KudoCardSeason0", function () {
     it("fails the batch if a tokenURI already exists", async () => {
       const [deployer, user1, user2] = await ethers.getSigners();
 
-      const KudoCardSeason0 = await ethers.getContractFactory(
-        "KudoCardSeason0"
-      );
-      const contract = await KudoCardSeason0.connect(deployer).deploy();
+      const KudoCard = await ethers.getContractFactory("KudoCard");
+      const contract = await KudoCard.connect(deployer).deploy();
       await contract.deployed();
 
       // One tokenUri already taken
