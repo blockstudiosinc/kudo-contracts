@@ -34,6 +34,14 @@ describe("KudoCard royalties", function () {
     );
   });
 
+  it("royalty wallet can't be zero address", async () => {
+    await expect(
+      contract
+        .connect(admin)
+        .setDefaultRoyalty(ethers.constants.AddressZero, 1000)
+    ).to.be.revertedWith("ERC2981: invalid receiver");
+  });
+
   it("royalty can't be more than 10%", async () => {
     await expect(
       contract.connect(admin).setDefaultRoyalty(royaltyWallet.address, 2000)

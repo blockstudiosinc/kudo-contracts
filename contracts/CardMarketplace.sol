@@ -29,6 +29,8 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     }
     mapping(uint256 => Listing) public listings;
 
+    bool public listingIsPaused = false;
+
     event CardListed(
         uint256 listingId,
         address indexed seller,
@@ -46,6 +48,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         address indexed buyer,
         uint256 indexed price
     );
+    event ListingPaused(address indexed pauser, bool indexed isPaused);
 
     constructor(
         address _kudoCard,
@@ -56,9 +59,9 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         mUSDC = IERC20(_mUSDC);
     }
 
-    // todo access control
-
     function list(uint256 tokenId, uint256 price) external nonReentrant {
+        require(listingIsPaused == false, "New listings paused");
+
         address seller = _msgSender();
 
         require(seller == kudoCard.ownerOf(tokenId), "Not card owner");
@@ -112,6 +115,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
             listing.tokenId,
             listing.price
         );
+        require(royaltyWallet != address(0), "Royalty not set");
 
         uint256 sellerAmount = listing.price - royaltyAmount;
 
@@ -156,6 +160,18 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         }
 
         return userListings;
+    }
+
+    // Pausing new listings
+
+    function pauseListings(bool isPaused)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(listingIsPaused != isPaused, "No change");
+
+        listingIsPaused = isPaused;
+        emit ListingPaused(msg.sender, isPaused);
     }
 
     // ERC2771ContextUpdatable overrides for meta transactions
