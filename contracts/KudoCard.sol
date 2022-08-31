@@ -34,6 +34,8 @@ contract KudoCard is
     bool public hasRevokedSetTokenURI = false;
     bool public hasRevokedUpdateApprovedMarkets = false;
 
+    string private contractMetadataURL = "";
+
     event BatchMinted(
         address indexed to,
         uint256[] tokenIds,
@@ -56,6 +58,10 @@ contract KudoCard is
         bool indexed approved
     );
     event RevokedUpdateApprovedMarkets(address indexed revoker);
+    event ContractMetadataURLUpdated(
+        address indexed updater,
+        string indexed url
+    );
 
     constructor() ERC721("KUDO Card", "KUDO") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -204,6 +210,25 @@ contract KudoCard is
 
         _setDefaultRoyalty(receiver, feeNumerator);
         emit RoyaltyUpdated(msg.sender, receiver, feeNumerator);
+    }
+
+    // Contract metadata for markets
+
+    function contractURI() public view returns (string memory) {
+        return contractMetadataURL;
+    }
+
+    function setContractMetadataURL(string memory url)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(
+            keccak256(bytes(contractMetadataURL)) != keccak256(bytes(url)),
+            "No change"
+        );
+
+        contractMetadataURL = url;
+        emit ContractMetadataURLUpdated(msg.sender, url);
     }
 
     // The following functions are overrides required by Solidity.
