@@ -57,9 +57,6 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     ) ERC2771ContextUpdatable(_trustedForwarder) {
         kudoCard = KudoCard(_kudoCard);
         mUSDC = IERC20(_mUSDC);
-
-        // TODO: test roles and role change
-        // _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function list(uint256 tokenId, uint256 price) external nonReentrant {
