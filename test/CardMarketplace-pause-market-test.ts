@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-describe("CardMarketplace pause", function () {
+describe("CardMarketplace pause market", function () {
   const tokenId = 1;
   const listingId = 1;
   const price = 1000;
@@ -55,7 +55,7 @@ describe("CardMarketplace pause", function () {
 
   it("reverts if non-admins try to pause", async () => {
     await expect(
-      marketContract.connect(user1).pauseListings(true)
+      marketContract.connect(user1).pauseMarket(true)
     ).to.be.revertedWith(
       `AccessControl: account ${user1.address.toLowerCase()} is missing role ${
         ethers.constants.AddressZero
@@ -64,36 +64,36 @@ describe("CardMarketplace pause", function () {
   });
 
   it("allows admins to pause", async () => {
-    expect(await marketContract.listingIsPaused()).to.eq(false);
+    expect(await marketContract.marketIsPaused()).to.eq(false);
 
-    await expect(marketContract.connect(deployer).pauseListings(true))
-      .to.emit(marketContract, "ListingPaused")
+    await expect(marketContract.connect(deployer).pauseMarket(true))
+      .to.emit(marketContract, "MarketPaused")
       .withArgs(deployer.address, true);
 
-    expect(await marketContract.listingIsPaused()).to.eq(true);
+    expect(await marketContract.marketIsPaused()).to.eq(true);
 
     await expect(
-      marketContract.connect(deployer).pauseListings(true)
+      marketContract.connect(deployer).pauseMarket(true)
     ).to.be.revertedWith("No change");
 
-    await expect(marketContract.connect(deployer).pauseListings(false))
-      .to.emit(marketContract, "ListingPaused")
+    await expect(marketContract.connect(deployer).pauseMarket(false))
+      .to.emit(marketContract, "MarketPaused")
       .withArgs(deployer.address, false);
 
     await expect(
-      marketContract.connect(deployer).pauseListings(false)
+      marketContract.connect(deployer).pauseMarket(false)
     ).to.be.revertedWith("No change");
   });
 
   it("allows pausing of new listings", async () => {
-    await marketContract.connect(deployer).pauseListings(true);
+    await marketContract.connect(deployer).pauseMarket(true);
 
     await expect(
       marketContract.connect(user1).list(tokenId, 1000)
-    ).to.be.revertedWith("New listings paused");
+    ).to.be.revertedWith("Market paused");
   });
 
-  it("allows buying when paused", async () => {
+  it("doesn't allow buying when paused", async () => {
     // Set the royalty
     await cardContract
       .connect(deployer)
@@ -103,7 +103,7 @@ describe("CardMarketplace pause", function () {
     await marketContract.connect(user1).list(tokenId, price);
 
     // Pause listing
-    await marketContract.connect(deployer).pauseListings(true);
+    await marketContract.connect(deployer).pauseMarket(true);
 
     // Give the buyer some mUSDC
     await tokenContract.connect(deployer).transfer(user2.address, price);
@@ -112,21 +112,21 @@ describe("CardMarketplace pause", function () {
     await tokenContract.connect(user2).approve(marketContract.address, price);
 
     // Buy
-    await expect(marketContract.connect(user2).buy(listingId))
-      .to.emit(marketContract, "CardSold")
-      .withArgs(listingId, user1.address, user2.address, price);
+    await expect(
+      marketContract.connect(user2).buy(listingId)
+    ).to.be.revertedWith("Market paused");
   });
 
-  it("allows de-listing when paused", async () => {
+  it("doesn't allow de-listing when paused", async () => {
     // List
     await marketContract.connect(user1).list(tokenId, price);
 
     // Pause listing
-    await marketContract.connect(deployer).pauseListings(true);
+    await marketContract.connect(deployer).pauseMarket(true);
 
     // Delist
-    await expect(marketContract.connect(user1).delist(listingId))
-      .to.emit(marketContract, "CardDelisted")
-      .withArgs(listingId, user1.address, tokenId);
+    await expect(
+      marketContract.connect(user1).delist(listingId)
+    ).to.be.revertedWith("Market paused");
   });
 });

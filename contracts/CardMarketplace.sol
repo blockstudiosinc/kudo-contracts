@@ -30,6 +30,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     mapping(uint256 => Listing) public listings;
 
     bool public listingIsPaused = false;
+    bool public marketIsPaused = false;
 
     event CardListed(
         uint256 listingId,
@@ -49,6 +50,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         uint256 indexed price
     );
     event ListingPaused(address indexed pauser, bool indexed isPaused);
+    event MarketPaused(address indexed pauser, bool indexed isPaused);
 
     constructor(
         address _kudoCard,
@@ -60,6 +62,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     }
 
     function list(uint256 tokenId, uint256 price) external nonReentrant {
+        require(marketIsPaused == false, "Market paused");
         require(listingIsPaused == false, "New listings paused");
 
         address seller = _msgSender();
@@ -85,6 +88,8 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     }
 
     function delist(uint256 listingId) external nonReentrant {
+        require(marketIsPaused == false, "Market paused");
+
         Listing storage listing = listings[listingId];
 
         require(listing.isActive == true, "Invalid listing");
@@ -99,6 +104,8 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
     }
 
     function buy(uint256 listingId) external nonReentrant {
+        require(marketIsPaused == false, "Market paused");
+
         Listing storage listing = listings[listingId];
 
         address buyer = _msgSender();
@@ -162,7 +169,7 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
         return userListings;
     }
 
-    // Pausing new listings
+    // Pausing
 
     function pauseListings(bool isPaused)
         external
@@ -172,6 +179,13 @@ contract CardMarketplace is ERC2771ContextUpdatable, ReentrancyGuard {
 
         listingIsPaused = isPaused;
         emit ListingPaused(msg.sender, isPaused);
+    }
+
+    function pauseMarket(bool isPaused) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(marketIsPaused != isPaused, "No change");
+
+        marketIsPaused = isPaused;
+        emit MarketPaused(msg.sender, isPaused);
     }
 
     // ERC2771ContextUpdatable overrides for meta transactions
