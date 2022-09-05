@@ -9,8 +9,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const cardDeployment: Deployment = await hre.deployments.get("KudoCard");
   const forwarder: Deployment = await hre.deployments.get("Forwarder");
 
-  // TODO: Make this dynamic for prod/testnet
-  const mUSDC = "0x566368d78dbdec50f04b588e152de3cec0d5889f";
+  const mUSDC = process.env.MUSDC_ADDRESS;
+
+  console.log("mUSDC address:", mUSDC);
 
   const deployment: Deployment = await deploy("CardMarketplace", {
     from: deployer,
