@@ -5,7 +5,9 @@
     "testnet-deploy": "npx hardhat deploy --network mumbai && npx hardhat --network mumbai etherscan-verify",
     "testnet-verify": "npx hardhat --network mumbai etherscan-verify",
     "testnet-deploy-export": "npx hardhat deploy --network mumbai --export-all ../kudo-api/abis.ts",
-    "testnet-deploy-export-reset": "npx hardhat deploy --reset --network mumbai --export-all ../kudo-api/abis.ts"
+    "testnet-deploy-export-reset": "npx hardhat deploy --reset --network mumbai --export-all ../kudo-api/abis.ts",
+    "mainnet-deploy-export": "DEPLOY_ENV=production npx hardhat deploy --network matic --export-all ../kudo-api/abis.ts",
+    "mainnet-verify": "DEPLOY_ENV=production npx hardhat --network matic etherscan-verify"
   },
   "devDependencies": {
     "@ensdomains/ens-contracts": "^0.0.12",
