@@ -9,7 +9,9 @@ import "solidity-coverage";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 
-dotenv.config();
+const envFile = process.env.DEPLOY_ENV === "production" ? ".env.prod" : ".env";
+
+dotenv.config({ path: envFile });
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -35,6 +37,10 @@ const config: HardhatUserConfig = {
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       accounts: [process.env.PRIVATE_KEY || ""],
+    },
+    matic: {
+      url: process.env.ALCHEMY_API_URL || "",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
   },
   gasReporter: {
