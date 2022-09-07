@@ -20,7 +20,6 @@ abstract contract ERC2771ContextUpdatable is Context, AccessControl {
     constructor(address forwarder) {
         trustedForwarder = forwarder;
 
-        // TODO: Does this need its own custom role? FORWARDER_UPDATER_ROLE ?
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
